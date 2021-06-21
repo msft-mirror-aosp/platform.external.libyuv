@@ -22,18 +22,18 @@ extern "C" {
 
 #ifdef HAVE_JPEG
 struct I420Buffers {
-  uint8_t* y;
+  uint8* y;
   int y_stride;
-  uint8_t* u;
+  uint8* u;
   int u_stride;
-  uint8_t* v;
+  uint8* v;
   int v_stride;
   int w;
   int h;
 };
 
 static void JpegCopyI420(void* opaque,
-                         const uint8_t* const* data,
+                         const uint8* const* data,
                          const int* strides,
                          int rows) {
   I420Buffers* dest = (I420Buffers*)(opaque);
@@ -47,7 +47,7 @@ static void JpegCopyI420(void* opaque,
 }
 
 static void JpegI422ToI420(void* opaque,
-                           const uint8_t* const* data,
+                           const uint8* const* data,
                            const int* strides,
                            int rows) {
   I420Buffers* dest = (I420Buffers*)(opaque);
@@ -61,7 +61,7 @@ static void JpegI422ToI420(void* opaque,
 }
 
 static void JpegI444ToI420(void* opaque,
-                           const uint8_t* const* data,
+                           const uint8* const* data,
                            const int* strides,
                            int rows) {
   I420Buffers* dest = (I420Buffers*)(opaque);
@@ -75,7 +75,7 @@ static void JpegI444ToI420(void* opaque,
 }
 
 static void JpegI400ToI420(void* opaque,
-                           const uint8_t* const* data,
+                           const uint8* const* data,
                            const int* strides,
                            int rows) {
   I420Buffers* dest = (I420Buffers*)(opaque);
@@ -89,12 +89,9 @@ static void JpegI400ToI420(void* opaque,
 
 // Query size of MJPG in pixels.
 LIBYUV_API
-int MJPGSize(const uint8_t* src_mjpg,
-             size_t src_size_mjpg,
-             int* width,
-             int* height) {
+int MJPGSize(const uint8* sample, size_t sample_size, int* width, int* height) {
   MJpegDecoder mjpeg_decoder;
-  LIBYUV_BOOL ret = mjpeg_decoder.LoadFrame(src_mjpg, src_size_mjpg);
+  LIBYUV_BOOL ret = mjpeg_decoder.LoadFrame(sample, sample_size);
   if (ret) {
     *width = mjpeg_decoder.GetWidth();
     *height = mjpeg_decoder.GetHeight();
@@ -104,38 +101,36 @@ int MJPGSize(const uint8_t* src_mjpg,
 }
 
 // MJPG (Motion JPeg) to I420
-// TODO(fbarchard): review src_width and src_height requirement. dst_width and
-// dst_height may be enough.
+// TODO(fbarchard): review w and h requirement. dw and dh may be enough.
 LIBYUV_API
-int MJPGToI420(const uint8_t* src_mjpg,
-               size_t src_size_mjpg,
-               uint8_t* dst_y,
-               int dst_stride_y,
-               uint8_t* dst_u,
-               int dst_stride_u,
-               uint8_t* dst_v,
-               int dst_stride_v,
-               int src_width,
-               int src_height,
-               int dst_width,
-               int dst_height) {
-  if (src_size_mjpg == kUnknownDataSize) {
+int MJPGToI420(const uint8* sample,
+               size_t sample_size,
+               uint8* y,
+               int y_stride,
+               uint8* u,
+               int u_stride,
+               uint8* v,
+               int v_stride,
+               int w,
+               int h,
+               int dw,
+               int dh) {
+  if (sample_size == kUnknownDataSize) {
     // ERROR: MJPEG frame size unknown
     return -1;
   }
 
   // TODO(fbarchard): Port MJpeg to C.
   MJpegDecoder mjpeg_decoder;
-  LIBYUV_BOOL ret = mjpeg_decoder.LoadFrame(src_mjpg, src_size_mjpg);
-  if (ret && (mjpeg_decoder.GetWidth() != src_width ||
-              mjpeg_decoder.GetHeight() != src_height)) {
+  LIBYUV_BOOL ret = mjpeg_decoder.LoadFrame(sample, sample_size);
+  if (ret &&
+      (mjpeg_decoder.GetWidth() != w || mjpeg_decoder.GetHeight() != h)) {
     // ERROR: MJPEG frame has unexpected dimensions
     mjpeg_decoder.UnloadFrame();
     return 1;  // runtime failure
   }
   if (ret) {
-    I420Buffers bufs = {dst_y, dst_stride_y, dst_u,     dst_stride_u,
-                        dst_v, dst_stride_v, dst_width, dst_height};
+    I420Buffers bufs = {y, y_stride, u, u_stride, v, v_stride, dw, dh};
     // YUV420
     if (mjpeg_decoder.GetColorSpace() == MJpegDecoder::kColorSpaceYCbCr &&
         mjpeg_decoder.GetNumComponents() == 3 &&
@@ -145,8 +140,7 @@ int MJPGToI420(const uint8_t* src_mjpg,
         mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
         mjpeg_decoder.GetVertSampFactor(2) == 1 &&
         mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegCopyI420, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegCopyI420, &bufs, dw, dh);
       // YUV422
     } else if (mjpeg_decoder.GetColorSpace() ==
                    MJpegDecoder::kColorSpaceYCbCr &&
@@ -157,8 +151,7 @@ int MJPGToI420(const uint8_t* src_mjpg,
                mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
                mjpeg_decoder.GetVertSampFactor(2) == 1 &&
                mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI422ToI420, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegI422ToI420, &bufs, dw, dh);
       // YUV444
     } else if (mjpeg_decoder.GetColorSpace() ==
                    MJpegDecoder::kColorSpaceYCbCr &&
@@ -169,20 +162,18 @@ int MJPGToI420(const uint8_t* src_mjpg,
                mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
                mjpeg_decoder.GetVertSampFactor(2) == 1 &&
                mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI444ToI420, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegI444ToI420, &bufs, dw, dh);
       // YUV400
     } else if (mjpeg_decoder.GetColorSpace() ==
                    MJpegDecoder::kColorSpaceGrayscale &&
                mjpeg_decoder.GetNumComponents() == 1 &&
                mjpeg_decoder.GetVertSampFactor(0) == 1 &&
                mjpeg_decoder.GetHorizSampFactor(0) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI400ToI420, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegI400ToI420, &bufs, dw, dh);
     } else {
-      // TODO(fbarchard): Implement conversion for any other
-      // colorspace/subsample factors that occur in practice. ERROR: Unable to
-      // convert MJPEG frame because format is not supported
+      // TODO(fbarchard): Implement conversion for any other colorspace/sample
+      // factors that occur in practice.
+      // ERROR: Unable to convert MJPEG frame because format is not supported
       mjpeg_decoder.UnloadFrame();
       return 1;
     }
@@ -190,153 +181,16 @@ int MJPGToI420(const uint8_t* src_mjpg,
   return ret ? 0 : 1;
 }
 
-struct NV21Buffers {
-  uint8_t* y;
-  int y_stride;
-  uint8_t* vu;
-  int vu_stride;
-  int w;
-  int h;
-};
-
-static void JpegI420ToNV21(void* opaque,
-                           const uint8_t* const* data,
-                           const int* strides,
-                           int rows) {
-  NV21Buffers* dest = (NV21Buffers*)(opaque);
-  I420ToNV21(data[0], strides[0], data[1], strides[1], data[2], strides[2],
-             dest->y, dest->y_stride, dest->vu, dest->vu_stride, dest->w, rows);
-  dest->y += rows * dest->y_stride;
-  dest->vu += ((rows + 1) >> 1) * dest->vu_stride;
-  dest->h -= rows;
-}
-
-static void JpegI422ToNV21(void* opaque,
-                           const uint8_t* const* data,
-                           const int* strides,
-                           int rows) {
-  NV21Buffers* dest = (NV21Buffers*)(opaque);
-  I422ToNV21(data[0], strides[0], data[1], strides[1], data[2], strides[2],
-             dest->y, dest->y_stride, dest->vu, dest->vu_stride, dest->w, rows);
-  dest->y += rows * dest->y_stride;
-  dest->vu += ((rows + 1) >> 1) * dest->vu_stride;
-  dest->h -= rows;
-}
-
-static void JpegI444ToNV21(void* opaque,
-                           const uint8_t* const* data,
-                           const int* strides,
-                           int rows) {
-  NV21Buffers* dest = (NV21Buffers*)(opaque);
-  I444ToNV21(data[0], strides[0], data[1], strides[1], data[2], strides[2],
-             dest->y, dest->y_stride, dest->vu, dest->vu_stride, dest->w, rows);
-  dest->y += rows * dest->y_stride;
-  dest->vu += ((rows + 1) >> 1) * dest->vu_stride;
-  dest->h -= rows;
-}
-
-static void JpegI400ToNV21(void* opaque,
-                           const uint8_t* const* data,
-                           const int* strides,
-                           int rows) {
-  NV21Buffers* dest = (NV21Buffers*)(opaque);
-  I400ToNV21(data[0], strides[0], dest->y, dest->y_stride, dest->vu,
-             dest->vu_stride, dest->w, rows);
-  dest->y += rows * dest->y_stride;
-  dest->vu += ((rows + 1) >> 1) * dest->vu_stride;
-  dest->h -= rows;
-}
-
-// MJPG (Motion JPeg) to NV21
-LIBYUV_API
-int MJPGToNV21(const uint8_t* src_mjpg,
-               size_t src_size_mjpg,
-               uint8_t* dst_y,
-               int dst_stride_y,
-               uint8_t* dst_vu,
-               int dst_stride_vu,
-               int src_width,
-               int src_height,
-               int dst_width,
-               int dst_height) {
-  if (src_size_mjpg == kUnknownDataSize) {
-    // ERROR: MJPEG frame size unknown
-    return -1;
-  }
-
-  // TODO(fbarchard): Port MJpeg to C.
-  MJpegDecoder mjpeg_decoder;
-  LIBYUV_BOOL ret = mjpeg_decoder.LoadFrame(src_mjpg, src_size_mjpg);
-  if (ret && (mjpeg_decoder.GetWidth() != src_width ||
-              mjpeg_decoder.GetHeight() != src_height)) {
-    // ERROR: MJPEG frame has unexpected dimensions
-    mjpeg_decoder.UnloadFrame();
-    return 1;  // runtime failure
-  }
-  if (ret) {
-    NV21Buffers bufs = {dst_y,         dst_stride_y, dst_vu,
-                        dst_stride_vu, dst_width,    dst_height};
-    // YUV420
-    if (mjpeg_decoder.GetColorSpace() == MJpegDecoder::kColorSpaceYCbCr &&
-        mjpeg_decoder.GetNumComponents() == 3 &&
-        mjpeg_decoder.GetVertSampFactor(0) == 2 &&
-        mjpeg_decoder.GetHorizSampFactor(0) == 2 &&
-        mjpeg_decoder.GetVertSampFactor(1) == 1 &&
-        mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
-        mjpeg_decoder.GetVertSampFactor(2) == 1 &&
-        mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI420ToNV21, &bufs, dst_width,
-                                           dst_height);
-      // YUV422
-    } else if (mjpeg_decoder.GetColorSpace() ==
-                   MJpegDecoder::kColorSpaceYCbCr &&
-               mjpeg_decoder.GetNumComponents() == 3 &&
-               mjpeg_decoder.GetVertSampFactor(0) == 1 &&
-               mjpeg_decoder.GetHorizSampFactor(0) == 2 &&
-               mjpeg_decoder.GetVertSampFactor(1) == 1 &&
-               mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
-               mjpeg_decoder.GetVertSampFactor(2) == 1 &&
-               mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI422ToNV21, &bufs, dst_width,
-                                           dst_height);
-      // YUV444
-    } else if (mjpeg_decoder.GetColorSpace() ==
-                   MJpegDecoder::kColorSpaceYCbCr &&
-               mjpeg_decoder.GetNumComponents() == 3 &&
-               mjpeg_decoder.GetVertSampFactor(0) == 1 &&
-               mjpeg_decoder.GetHorizSampFactor(0) == 1 &&
-               mjpeg_decoder.GetVertSampFactor(1) == 1 &&
-               mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
-               mjpeg_decoder.GetVertSampFactor(2) == 1 &&
-               mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI444ToNV21, &bufs, dst_width,
-                                           dst_height);
-      // YUV400
-    } else if (mjpeg_decoder.GetColorSpace() ==
-                   MJpegDecoder::kColorSpaceGrayscale &&
-               mjpeg_decoder.GetNumComponents() == 1 &&
-               mjpeg_decoder.GetVertSampFactor(0) == 1 &&
-               mjpeg_decoder.GetHorizSampFactor(0) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI400ToNV21, &bufs, dst_width,
-                                           dst_height);
-    } else {
-      // Unknown colorspace.
-      mjpeg_decoder.UnloadFrame();
-      return 1;
-    }
-  }
-  return ret ? 0 : 1;
-}
-
+#ifdef HAVE_JPEG
 struct ARGBBuffers {
-  uint8_t* argb;
+  uint8* argb;
   int argb_stride;
   int w;
   int h;
 };
 
 static void JpegI420ToARGB(void* opaque,
-                           const uint8_t* const* data,
+                           const uint8* const* data,
                            const int* strides,
                            int rows) {
   ARGBBuffers* dest = (ARGBBuffers*)(opaque);
@@ -347,7 +201,7 @@ static void JpegI420ToARGB(void* opaque,
 }
 
 static void JpegI422ToARGB(void* opaque,
-                           const uint8_t* const* data,
+                           const uint8* const* data,
                            const int* strides,
                            int rows) {
   ARGBBuffers* dest = (ARGBBuffers*)(opaque);
@@ -358,7 +212,7 @@ static void JpegI422ToARGB(void* opaque,
 }
 
 static void JpegI444ToARGB(void* opaque,
-                           const uint8_t* const* data,
+                           const uint8* const* data,
                            const int* strides,
                            int rows) {
   ARGBBuffers* dest = (ARGBBuffers*)(opaque);
@@ -369,7 +223,7 @@ static void JpegI444ToARGB(void* opaque,
 }
 
 static void JpegI400ToARGB(void* opaque,
-                           const uint8_t* const* data,
+                           const uint8* const* data,
                            const int* strides,
                            int rows) {
   ARGBBuffers* dest = (ARGBBuffers*)(opaque);
@@ -379,33 +233,32 @@ static void JpegI400ToARGB(void* opaque,
 }
 
 // MJPG (Motion JPeg) to ARGB
-// TODO(fbarchard): review src_width and src_height requirement. dst_width and
-// dst_height may be enough.
+// TODO(fbarchard): review w and h requirement. dw and dh may be enough.
 LIBYUV_API
-int MJPGToARGB(const uint8_t* src_mjpg,
-               size_t src_size_mjpg,
-               uint8_t* dst_argb,
-               int dst_stride_argb,
-               int src_width,
-               int src_height,
-               int dst_width,
-               int dst_height) {
-  if (src_size_mjpg == kUnknownDataSize) {
+int MJPGToARGB(const uint8* sample,
+               size_t sample_size,
+               uint8* argb,
+               int argb_stride,
+               int w,
+               int h,
+               int dw,
+               int dh) {
+  if (sample_size == kUnknownDataSize) {
     // ERROR: MJPEG frame size unknown
     return -1;
   }
 
   // TODO(fbarchard): Port MJpeg to C.
   MJpegDecoder mjpeg_decoder;
-  LIBYUV_BOOL ret = mjpeg_decoder.LoadFrame(src_mjpg, src_size_mjpg);
-  if (ret && (mjpeg_decoder.GetWidth() != src_width ||
-              mjpeg_decoder.GetHeight() != src_height)) {
+  LIBYUV_BOOL ret = mjpeg_decoder.LoadFrame(sample, sample_size);
+  if (ret &&
+      (mjpeg_decoder.GetWidth() != w || mjpeg_decoder.GetHeight() != h)) {
     // ERROR: MJPEG frame has unexpected dimensions
     mjpeg_decoder.UnloadFrame();
     return 1;  // runtime failure
   }
   if (ret) {
-    ARGBBuffers bufs = {dst_argb, dst_stride_argb, dst_width, dst_height};
+    ARGBBuffers bufs = {argb, argb_stride, dw, dh};
     // YUV420
     if (mjpeg_decoder.GetColorSpace() == MJpegDecoder::kColorSpaceYCbCr &&
         mjpeg_decoder.GetNumComponents() == 3 &&
@@ -415,8 +268,7 @@ int MJPGToARGB(const uint8_t* src_mjpg,
         mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
         mjpeg_decoder.GetVertSampFactor(2) == 1 &&
         mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI420ToARGB, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegI420ToARGB, &bufs, dw, dh);
       // YUV422
     } else if (mjpeg_decoder.GetColorSpace() ==
                    MJpegDecoder::kColorSpaceYCbCr &&
@@ -427,8 +279,7 @@ int MJPGToARGB(const uint8_t* src_mjpg,
                mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
                mjpeg_decoder.GetVertSampFactor(2) == 1 &&
                mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI422ToARGB, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegI422ToARGB, &bufs, dw, dh);
       // YUV444
     } else if (mjpeg_decoder.GetColorSpace() ==
                    MJpegDecoder::kColorSpaceYCbCr &&
@@ -439,28 +290,27 @@ int MJPGToARGB(const uint8_t* src_mjpg,
                mjpeg_decoder.GetHorizSampFactor(1) == 1 &&
                mjpeg_decoder.GetVertSampFactor(2) == 1 &&
                mjpeg_decoder.GetHorizSampFactor(2) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI444ToARGB, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegI444ToARGB, &bufs, dw, dh);
       // YUV400
     } else if (mjpeg_decoder.GetColorSpace() ==
                    MJpegDecoder::kColorSpaceGrayscale &&
                mjpeg_decoder.GetNumComponents() == 1 &&
                mjpeg_decoder.GetVertSampFactor(0) == 1 &&
                mjpeg_decoder.GetHorizSampFactor(0) == 1) {
-      ret = mjpeg_decoder.DecodeToCallback(&JpegI400ToARGB, &bufs, dst_width,
-                                           dst_height);
+      ret = mjpeg_decoder.DecodeToCallback(&JpegI400ToARGB, &bufs, dw, dh);
     } else {
-      // TODO(fbarchard): Implement conversion for any other
-      // colorspace/subsample factors that occur in practice. ERROR: Unable to
-      // convert MJPEG frame because format is not supported
+      // TODO(fbarchard): Implement conversion for any other colorspace/sample
+      // factors that occur in practice.
+      // ERROR: Unable to convert MJPEG frame because format is not supported
       mjpeg_decoder.UnloadFrame();
       return 1;
     }
   }
   return ret ? 0 : 1;
 }
+#endif
 
-#endif  // HAVE_JPEG
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"

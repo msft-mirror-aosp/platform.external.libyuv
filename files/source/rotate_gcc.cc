@@ -22,9 +22,9 @@ extern "C" {
 
 // Transpose 8x8. 32 or 64 bit, but not NaCL for 64 bit.
 #if defined(HAS_TRANSPOSEWX8_SSSE3)
-void TransposeWx8_SSSE3(const uint8_t* src,
+void TransposeWx8_SSSE3(const uint8* src,
                         int src_stride,
-                        uint8_t* dst,
+                        uint8* dst,
                         int dst_stride,
                         int width) {
   asm volatile(
@@ -112,9 +112,9 @@ void TransposeWx8_SSSE3(const uint8_t* src,
 
 // Transpose 16x8. 64 bit
 #if defined(HAS_TRANSPOSEWX8_FAST_SSSE3)
-void TransposeWx8_Fast_SSSE3(const uint8_t* src,
+void TransposeWx8_Fast_SSSE3(const uint8* src,
                              int src_stride,
-                             uint8_t* dst,
+                             uint8* dst,
                              int dst_stride,
                              int width) {
   asm volatile(
@@ -255,11 +255,11 @@ void TransposeWx8_Fast_SSSE3(const uint8_t* src,
 
 // Transpose UV 8x8.  64 bit.
 #if defined(HAS_TRANSPOSEUVWX8_SSE2)
-void TransposeUVWx8_SSE2(const uint8_t* src,
+void TransposeUVWx8_SSE2(const uint8* src,
                          int src_stride,
-                         uint8_t* dst_a,
+                         uint8* dst_a,
                          int dst_stride_a,
-                         uint8_t* dst_b,
+                         uint8* dst_b,
                          int dst_stride_b,
                          int width) {
   asm volatile(
