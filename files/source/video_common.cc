@@ -15,13 +15,14 @@ namespace libyuv {
 extern "C" {
 #endif
 
+#define ARRAY_SIZE(x) (int)(sizeof(x) / sizeof(x[0]))
+
 struct FourCCAliasEntry {
-  uint32_t alias;
-  uint32_t canonical;
+  uint32 alias;
+  uint32 canonical;
 };
 
-#define NUM_ALIASES 18
-static const struct FourCCAliasEntry kFourCCAliases[NUM_ALIASES] = {
+static const struct FourCCAliasEntry kFourCCAliases[] = {
     {FOURCC_IYUV, FOURCC_I420},
     {FOURCC_YU12, FOURCC_I420},
     {FOURCC_YU16, FOURCC_I422},
@@ -45,9 +46,9 @@ static const struct FourCCAliasEntry kFourCCAliases[NUM_ALIASES] = {
 //  {FOURCC_BGRA, FOURCC_ARGB},  // kCMPixelFormat_32BGRA
 
 LIBYUV_API
-uint32_t CanonicalFourCC(uint32_t fourcc) {
+uint32 CanonicalFourCC(uint32 fourcc) {
   int i;
-  for (i = 0; i < NUM_ALIASES; ++i) {
+  for (i = 0; i < ARRAY_SIZE(kFourCCAliases); ++i) {
     if (kFourCCAliases[i].alias == fourcc) {
       return kFourCCAliases[i].canonical;
     }
