@@ -1,3 +1,14 @@
+name: "libyuv"
+description:
+    "libyuv is an open source project that includes YUV scaling and conversion "
+    "functionality."
+
 third_party {
+  url {
+    type: GIT
+    value: "https://chromium.googlesource.com/libyuv/libyuv/"
+  }
+  version: "2a6cb7431939faba1b40d3f08883847f0cf63572"
+  last_upgrade_date { year: 2023 month: 6 day: 1 }
   license_type: NOTICE
 }
