@@ -5,7 +5,7 @@ description:
 
 third_party {
   url {
-    type: GIT
+    type: ARCHIVE
     value: "https://chromium.googlesource.com/libyuv/libyuv/"
   }
   version: "2a6cb7431939faba1b40d3f08883847f0cf63572"
