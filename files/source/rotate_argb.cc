@@ -8,11 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "libyuv/rotate.h"
+#include "libyuv/rotate_argb.h"
 
 #include "libyuv/convert.h"
 #include "libyuv/cpu_id.h"
 #include "libyuv/planar_functions.h"
+#include "libyuv/rotate.h"
 #include "libyuv/row.h"
 #include "libyuv/scale_row.h" /* for ScaleARGBRowDownEven_ */
 
@@ -155,6 +156,14 @@ static int ARGBRotate180(const uint8_t* src_argb,
     }
   }
 #endif
+#if defined(HAS_ARGBMIRRORROW_LSX)
+  if (TestCpuFlag(kCpuHasLSX)) {
+    ARGBMirrorRow = ARGBMirrorRow_Any_LSX;
+    if (IS_ALIGNED(width, 8)) {
+      ARGBMirrorRow = ARGBMirrorRow_LSX;
+    }
+  }
+#endif
 #if defined(HAS_ARGBMIRRORROW_LASX)
   if (TestCpuFlag(kCpuHasLASX)) {
     ARGBMirrorRow = ARGBMirrorRow_Any_LASX;
@@ -181,6 +190,11 @@ static int ARGBRotate180(const uint8_t* src_argb,
 #if defined(HAS_COPYROW_NEON)
   if (TestCpuFlag(kCpuHasNEON)) {
     CopyRow = IS_ALIGNED(width * 4, 32) ? CopyRow_NEON : CopyRow_Any_NEON;
+  }
+#endif
+#if defined(HAS_COPYROW_RVV)
+  if (TestCpuFlag(kCpuHasRVV)) {
+    CopyRow = CopyRow_RVV;
   }
 #endif
 
