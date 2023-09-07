@@ -48,7 +48,6 @@ extern "C" {
                                    defined(__i386__) || defined(_M_IX86))
 #define LIBYUV_ARGBTOUV_PAVGB 1
 #define LIBYUV_RGBTOU_TRUNCATE 1
-#define LIBYUV_ATTENUATE_DUP 1
 #endif
 #if defined(LIBYUV_BIT_EXACT)
 #define LIBYUV_UNATTENUATE_DUP 1
@@ -1876,9 +1875,10 @@ static __inline void YPixel(uint8_t y,
   int yg = yuvconstants->kYToRgb[0];
 #endif
   uint32_t y1 = (uint32_t)(y * 0x0101 * yg) >> 16;
-  *b = STATIC_CAST(uint8_t, Clamp(((int32_t)(y1) + ygb) >> 6));
-  *g = STATIC_CAST(uint8_t, Clamp(((int32_t)(y1) + ygb) >> 6));
-  *r = STATIC_CAST(uint8_t, Clamp(((int32_t)(y1) + ygb) >> 6));
+  uint8_t b8 = STATIC_CAST(uint8_t, Clamp(((int32_t)(y1) + ygb) >> 6));
+  *b = b8;
+  *g = b8;
+  *r = b8;
 }
 
 void I444ToARGBRow_C(const uint8_t* src_y,
@@ -3369,12 +3369,7 @@ void BlendPlaneRow_C(const uint8_t* src0,
 }
 #undef UBLEND
 
-#if LIBYUV_ATTENUATE_DUP
-// This code mimics the SSSE3 version for better testability.
-#define ATTENUATE(f, a) (a | (a << 8)) * (f | (f << 8)) >> 24
-#else
-#define ATTENUATE(f, a) (f * a + 128) >> 8
-#endif
+#define ATTENUATE(f, a) (f * a + 255) >> 8
 
 // Multiply source RGB by alpha and store to destination.
 void ARGBAttenuateRow_C(const uint8_t* src_argb, uint8_t* dst_argb, int width) {
