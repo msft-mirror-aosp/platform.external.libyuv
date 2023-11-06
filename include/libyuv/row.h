@@ -31,7 +31,10 @@ extern "C" {
 #endif
 // MemorySanitizer does not support assembly code yet. http://crbug.com/344505
 #if defined(__has_feature)
-#if __has_feature(memory_sanitizer)
+#if __has_feature(memory_sanitizer) && !defined(LIBYUV_DISABLE_NEON)
+#define LIBYUV_DISABLE_NEON
+#endif
+#if __has_feature(memory_sanitizer) && !defined(LIBYUV_DISABLE_X86)
 #define LIBYUV_DISABLE_X86
 #endif
 #endif
@@ -161,7 +164,6 @@ extern "C" {
 #define HAS_ARGBSEPIAROW_SSSE3
 #define HAS_ARGBSHADEROW_SSE2
 #define HAS_ARGBSUBTRACTROW_SSE2
-#define HAS_ARGBUNATTENUATEROW_SSE2
 #define HAS_BLENDPLANEROW_SSSE3
 #define HAS_COMPUTECUMULATIVESUMROW_SSE2
 #define HAS_CUMULATIVESUMTOAVERAGEROW_SSE2
@@ -171,9 +173,6 @@ extern "C" {
 #define HAS_SOBELXROW_SSE2
 #define HAS_SOBELXYROW_SSE2
 #define HAS_SOBELYROW_SSE2
-#if !defined(LIBYUV_BIT_EXACT)
-#define HAS_ARGBATTENUATEROW_SSSE3
-#endif
 
 // The following functions fail on gcc/clang 32 bit with fpic and framepointer.
 // caveat: clangcl uses row_win.cc which works.
@@ -241,11 +240,7 @@ extern "C" {
 #define HAS_ARGBADDROW_AVX2
 #define HAS_ARGBMULTIPLYROW_AVX2
 #define HAS_ARGBSUBTRACTROW_AVX2
-#define HAS_ARGBUNATTENUATEROW_AVX2
 #define HAS_BLENDPLANEROW_AVX2
-#if !defined(LIBYUV_BIT_EXACT)
-#define HAS_ARGBATTENUATEROW_AVX2
-#endif
 
 #if defined(__x86_64__) || !defined(__pic__) || defined(__clang__) || \
     defined(_MSC_VER)
@@ -285,14 +280,15 @@ extern "C" {
 #define HAS_ABGRTOAR30ROW_SSSE3
 #define HAS_ABGRTOYJROW_SSSE3
 #define HAS_AR64TOARGBROW_SSSE3
+#define HAS_ARGBATTENUATEROW_SSSE3
 #define HAS_ARGBTOAB64ROW_SSSE3
 #define HAS_ARGBTOAR30ROW_SSSE3
 #define HAS_ARGBTOAR64ROW_SSSE3
+#define HAS_ARGBUNATTENUATEROW_SSE2
 #define HAS_CONVERT16TO8ROW_SSSE3
 #define HAS_CONVERT8TO16ROW_SSE2
-#define HAS_DETILEROW_SSE2
 #define HAS_DETILEROW_16_SSE2
-#define HAS_DETILEROW_16_AVX
+#define HAS_DETILEROW_SSE2
 #define HAS_DETILESPLITUVROW_SSSE3
 #define HAS_DETILETOYUY2_SSE2
 #define HAS_HALFMERGEUVROW_SSSE3
@@ -345,13 +341,16 @@ extern "C" {
 #define HAS_ABGRTOYJROW_AVX2
 #define HAS_ABGRTOYROW_AVX2
 #define HAS_AR64TOARGBROW_AVX2
+#define HAS_ARGBATTENUATEROW_AVX2
 #define HAS_ARGBTOAB64ROW_AVX2
 #define HAS_ARGBTOAR30ROW_AVX2
 #define HAS_ARGBTOAR64ROW_AVX2
 #define HAS_ARGBTORAWROW_AVX2
 #define HAS_ARGBTORGB24ROW_AVX2
+#define HAS_ARGBUNATTENUATEROW_AVX2
 #define HAS_CONVERT16TO8ROW_AVX2
 #define HAS_CONVERT8TO16ROW_AVX2
+#define HAS_DETILEROW_16_AVX
 #define HAS_DIVIDEROW_16_AVX2
 #define HAS_HALFMERGEUVROW_AVX2
 #define HAS_I210TOAR30ROW_AVX2
@@ -795,19 +794,25 @@ extern "C" {
 #endif
 
 #if !defined(LIBYUV_DISABLE_RVV) && defined(__riscv_vector)
+#define HAS_COPYROW_RVV
+#if __riscv_v_intrinsic == 11000
 #define HAS_AB64TOARGBROW_RVV
+#define HAS_ABGRTOYJROW_RVV
+#define HAS_ABGRTOYROW_RVV
 #define HAS_AR64TOARGBROW_RVV
 #define HAS_ARGBATTENUATEROW_RVV
+#define HAS_ARGBBLENDROW_RVV
+#define HAS_ARGBCOPYYTOALPHAROW_RVV
+#define HAS_ARGBEXTRACTALPHAROW_RVV
 #define HAS_ARGBTOAB64ROW_RVV
 #define HAS_ARGBTOAR64ROW_RVV
 #define HAS_ARGBTORAWROW_RVV
 #define HAS_ARGBTORGB24ROW_RVV
-#define HAS_ARGBTOYROW_RVV
 #define HAS_ARGBTOYJROW_RVV
-#define HAS_ABGRTOYROW_RVV
-#define HAS_ABGRTOYJROW_RVV
+#define HAS_ARGBTOYMATRIXROW_RVV
+#define HAS_ARGBTOYROW_RVV
 #define HAS_BGRATOYROW_RVV
-#define HAS_COPYROW_RVV
+#define HAS_BLENDPLANEROW_RVV
 #define HAS_I400TOARGBROW_RVV
 #define HAS_I422ALPHATOARGBROW_RVV
 #define HAS_I422TOARGBROW_RVV
@@ -822,10 +827,10 @@ extern "C" {
 #define HAS_MERGERGBROW_RVV
 #define HAS_MERGEUVROW_RVV
 #define HAS_MERGEXRGBROW_RVV
-#define HAS_SPLITARGBROW_RVV
-#define HAS_SPLITRGBROW_RVV
-#define HAS_SPLITUVROW_RVV
-#define HAS_SPLITXRGBROW_RVV
+#define HAS_NV12TOARGBROW_RVV
+#define HAS_NV12TORGB24ROW_RVV
+#define HAS_NV21TOARGBROW_RVV
+#define HAS_NV21TORGB24ROW_RVV
 #define HAS_RAWTOARGBROW_RVV
 #define HAS_RAWTORGB24ROW_RVV
 #define HAS_RAWTORGBAROW_RVV
@@ -834,8 +839,15 @@ extern "C" {
 #define HAS_RGB24TOARGBROW_RVV
 #define HAS_RGB24TOYJROW_RVV
 #define HAS_RGB24TOYROW_RVV
-#define HAS_RGBATOYROW_RVV
 #define HAS_RGBATOYJROW_RVV
+#define HAS_RGBATOYMATRIXROW_RVV
+#define HAS_RGBATOYROW_RVV
+#define HAS_RGBTOYMATRIXROW_RVV
+#define HAS_SPLITARGBROW_RVV
+#define HAS_SPLITRGBROW_RVV
+#define HAS_SPLITUVROW_RVV
+#define HAS_SPLITXRGBROW_RVV
+#endif
 #endif
 
 #if defined(_MSC_VER) && !defined(__CLR_VER) && !defined(__clang__)
@@ -1351,6 +1363,26 @@ void UYVYToARGBRow_LSX(const uint8_t* src_uyvy,
                        uint8_t* dst_argb,
                        const struct YuvConstants* yuvconstants,
                        int width);
+void NV12ToARGBRow_RVV(const uint8_t* src_y,
+                       const uint8_t* src_uv,
+                       uint8_t* dst_argb,
+                       const struct YuvConstants* yuvconstants,
+                       int width);
+void NV21ToARGBRow_RVV(const uint8_t* src_y,
+                       const uint8_t* src_vu,
+                       uint8_t* dst_argb,
+                       const struct YuvConstants* yuvconstants,
+                       int width);
+void NV12ToRGB24Row_RVV(const uint8_t* src_y,
+                        const uint8_t* src_uv,
+                        uint8_t* dst_rgb24,
+                        const struct YuvConstants* yuvconstants,
+                        int width);
+void NV21ToRGB24Row_RVV(const uint8_t* src_y,
+                        const uint8_t* src_vu,
+                        uint8_t* dst_rgb24,
+                        const struct YuvConstants* yuvconstants,
+                        int width);
 
 void ARGBToYRow_AVX2(const uint8_t* src_argb, uint8_t* dst_y, int width);
 void ARGBToYRow_Any_AVX2(const uint8_t* src_ptr, uint8_t* dst_ptr, int width);
@@ -3081,6 +3113,9 @@ void ARGBExtractAlphaRow_MSA(const uint8_t* src_argb,
 void ARGBExtractAlphaRow_LSX(const uint8_t* src_argb,
                              uint8_t* dst_a,
                              int width);
+void ARGBExtractAlphaRow_RVV(const uint8_t* src_argb,
+                             uint8_t* dst_a,
+                             int width);
 void ARGBExtractAlphaRow_Any_SSE2(const uint8_t* src_ptr,
                                   uint8_t* dst_ptr,
                                   int width);
@@ -3100,6 +3135,7 @@ void ARGBExtractAlphaRow_Any_LSX(const uint8_t* src_ptr,
 void ARGBCopyYToAlphaRow_C(const uint8_t* src, uint8_t* dst, int width);
 void ARGBCopyYToAlphaRow_SSE2(const uint8_t* src, uint8_t* dst, int width);
 void ARGBCopyYToAlphaRow_AVX2(const uint8_t* src, uint8_t* dst, int width);
+void ARGBCopyYToAlphaRow_RVV(const uint8_t* src, uint8_t* dst, int width);
 void ARGBCopyYToAlphaRow_Any_SSE2(const uint8_t* src_ptr,
                                   uint8_t* dst_ptr,
                                   int width);
@@ -4515,6 +4551,10 @@ void ARGBBlendRow_LSX(const uint8_t* src_argb0,
                       const uint8_t* src_argb1,
                       uint8_t* dst_argb,
                       int width);
+void ARGBBlendRow_RVV(const uint8_t* src_argb0,
+                      const uint8_t* src_argb1,
+                      uint8_t* dst_argb,
+                      int width);
 void ARGBBlendRow_C(const uint8_t* src_argb,
                     const uint8_t* src_argb1,
                     uint8_t* dst_argb,
@@ -4541,6 +4581,11 @@ void BlendPlaneRow_Any_AVX2(const uint8_t* y_buf,
                             const uint8_t* v_buf,
                             uint8_t* dst_ptr,
                             int width);
+void BlendPlaneRow_RVV(const uint8_t* src0,
+                       const uint8_t* src1,
+                       const uint8_t* alpha,
+                       uint8_t* dst,
+                       int width);
 void BlendPlaneRow_C(const uint8_t* src0,
                      const uint8_t* src1,
                      const uint8_t* alpha,
@@ -6180,7 +6225,19 @@ void ByteToFloatRow_Any_NEON(const uint8_t* src_ptr,
                              float* dst_ptr,
                              float param,
                              int width);
-
+// Convert FP16 Half Floats to FP32 Floats
+void ConvertFP16ToFP32Row_NEON(const uint16_t* src,  // fp16
+                               float* dst,
+                               int width);
+// Convert a column of FP16 Half Floats to a row of FP32 Floats
+void ConvertFP16ToFP32Column_NEON(const uint16_t* src,  // fp16
+                                  int src_stride,       // stride in elements
+                                  float* dst,
+                                  int width);
+// Convert FP32 Floats to FP16 Half Floats
+void ConvertFP32ToFP16Row_NEON(const float* src,
+                               uint16_t* dst,  // fp16
+                               int width);
 void ARGBLumaColorTableRow_C(const uint8_t* src_argb,
                              uint8_t* dst_argb,
                              int width,
