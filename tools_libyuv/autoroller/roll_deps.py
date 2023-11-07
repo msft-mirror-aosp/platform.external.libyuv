@@ -31,7 +31,6 @@ def FindSrcDirPath():
 
 # Skip these dependencies (list without solution name prefix).
 DONT_AUTOROLL_THESE = [
-    'third_party/fuchsia-gn-sdk',
     'src/third_party/gflags/src',
     'src/third_party/mockito/src',
 ]

@@ -2783,38 +2783,17 @@ int RGB24Mirror(const uint8_t* src_rgb24,
   return 0;
 }
 
-// Alpha Blend 2 ARGB images and store to destination.
+// Get a blender that optimized for the CPU and pixel count.
+// As there are 6 blenders to choose from, the caller should try to use
+// the same blend function for all pixels if possible.
 LIBYUV_API
-int ARGBBlend(const uint8_t* src_argb0,
-              int src_stride_argb0,
-              const uint8_t* src_argb1,
-              int src_stride_argb1,
-              uint8_t* dst_argb,
-              int dst_stride_argb,
-              int width,
-              int height) {
-  int y;
+ARGBBlendRow GetARGBBlend() {
   void (*ARGBBlendRow)(const uint8_t* src_argb, const uint8_t* src_argb1,
                        uint8_t* dst_argb, int width) = ARGBBlendRow_C;
-  if (!src_argb0 || !src_argb1 || !dst_argb || width <= 0 || height == 0) {
-    return -1;
-  }
-  // Negative height means invert the image.
-  if (height < 0) {
-    height = -height;
-    dst_argb = dst_argb + (height - 1) * dst_stride_argb;
-    dst_stride_argb = -dst_stride_argb;
-  }
-  // Coalesce rows.
-  if (src_stride_argb0 == width * 4 && src_stride_argb1 == width * 4 &&
-      dst_stride_argb == width * 4) {
-    width *= height;
-    height = 1;
-    src_stride_argb0 = src_stride_argb1 = dst_stride_argb = 0;
-  }
 #if defined(HAS_ARGBBLENDROW_SSSE3)
   if (TestCpuFlag(kCpuHasSSSE3)) {
     ARGBBlendRow = ARGBBlendRow_SSSE3;
+    return ARGBBlendRow;
   }
 #endif
 #if defined(HAS_ARGBBLENDROW_NEON)
@@ -2832,11 +2811,39 @@ int ARGBBlend(const uint8_t* src_argb0,
     ARGBBlendRow = ARGBBlendRow_LSX;
   }
 #endif
-#if defined(HAS_ARGBBLENDROW_RVV)
-  if (TestCpuFlag(kCpuHasRVV)) {
-    ARGBBlendRow = ARGBBlendRow_RVV;
+  return ARGBBlendRow;
+}
+
+// Alpha Blend 2 ARGB images and store to destination.
+LIBYUV_API
+int ARGBBlend(const uint8_t* src_argb0,
+              int src_stride_argb0,
+              const uint8_t* src_argb1,
+              int src_stride_argb1,
+              uint8_t* dst_argb,
+              int dst_stride_argb,
+              int width,
+              int height) {
+  int y;
+  void (*ARGBBlendRow)(const uint8_t* src_argb, const uint8_t* src_argb1,
+                       uint8_t* dst_argb, int width) = GetARGBBlend();
+  if (!src_argb0 || !src_argb1 || !dst_argb || width <= 0 || height == 0) {
+    return -1;
   }
-#endif
+  // Negative height means invert the image.
+  if (height < 0) {
+    height = -height;
+    dst_argb = dst_argb + (height - 1) * dst_stride_argb;
+    dst_stride_argb = -dst_stride_argb;
+  }
+  // Coalesce rows.
+  if (src_stride_argb0 == width * 4 && src_stride_argb1 == width * 4 &&
+      dst_stride_argb == width * 4) {
+    width *= height;
+    height = 1;
+    src_stride_argb0 = src_stride_argb1 = dst_stride_argb = 0;
+  }
+
   for (y = 0; y < height; ++y) {
     ARGBBlendRow(src_argb0, src_argb1, dst_argb, width);
     src_argb0 += src_stride_argb0;
@@ -2894,11 +2901,6 @@ int BlendPlane(const uint8_t* src_y0,
     if (IS_ALIGNED(width, 32)) {
       BlendPlaneRow = BlendPlaneRow_AVX2;
     }
-  }
-#endif
-#if defined(HAS_BLENDPLANEROW_RVV)
-  if (TestCpuFlag(kCpuHasRVV)) {
-    BlendPlaneRow = BlendPlaneRow_RVV;
   }
 #endif
 
@@ -2978,11 +2980,6 @@ int I420Blend(const uint8_t* src_y0,
     }
   }
 #endif
-#if defined(HAS_BLENDPLANEROW_RVV)
-  if (TestCpuFlag(kCpuHasRVV)) {
-    BlendPlaneRow = BlendPlaneRow_RVV;
-  }
-#endif
   if (!IS_ALIGNED(width, 2)) {
     ScaleRowDown2 = ScaleRowDown2Box_Odd_C;
   }
@@ -3017,11 +3014,6 @@ int I420Blend(const uint8_t* src_y0,
         ScaleRowDown2 = ScaleRowDown2Box_AVX2;
       }
     }
-  }
-#endif
-#if defined(HAS_SCALEROWDOWN2_RVV)
-  if (TestCpuFlag(kCpuHasRVV)) {
-    ScaleRowDown2 = ScaleRowDown2Box_RVV;
   }
 #endif
 
@@ -5348,11 +5340,6 @@ int ARGBExtractAlpha(const uint8_t* src_argb,
                                                 : ARGBExtractAlphaRow_Any_LSX;
   }
 #endif
-#if defined(HAS_ARGBEXTRACTALPHAROW_RVV)
-  if (TestCpuFlag(kCpuHasRVV)) {
-    ARGBExtractAlphaRow = ARGBExtractAlphaRow_RVV;
-  }
-#endif
 
   for (int y = 0; y < height; ++y) {
     ARGBExtractAlphaRow(src_argb, dst_a, width);
@@ -5402,11 +5389,6 @@ int ARGBCopyYToAlpha(const uint8_t* src_y,
     if (IS_ALIGNED(width, 16)) {
       ARGBCopyYToAlphaRow = ARGBCopyYToAlphaRow_AVX2;
     }
-  }
-#endif
-#if defined(HAS_ARGBCOPYYTOALPHAROW_RVV)
-  if (TestCpuFlag(kCpuHasRVV)) {
-    ARGBCopyYToAlphaRow = ARGBCopyYToAlphaRow_RVV;
   }
 #endif
 

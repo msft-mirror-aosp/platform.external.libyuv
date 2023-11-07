@@ -30,10 +30,7 @@ extern "C" {
 #endif
 // MemorySanitizer does not support assembly code yet. http://crbug.com/344505
 #if defined(__has_feature)
-#if __has_feature(memory_sanitizer) && !defined(LIBYUV_DISABLE_NEON)
-#define LIBYUV_DISABLE_NEON
-#endif
-#if __has_feature(memory_sanitizer) && !defined(LIBYUV_DISABLE_X86)
+#if __has_feature(memory_sanitizer)
 #define LIBYUV_DISABLE_X86
 #endif
 #endif
@@ -829,6 +826,15 @@ int ARGBCopyYToAlpha(const uint8_t* src_y,
                      int dst_stride_argb,
                      int width,
                      int height);
+
+typedef void (*ARGBBlendRow)(const uint8_t* src_argb0,
+                             const uint8_t* src_argb1,
+                             uint8_t* dst_argb,
+                             int width);
+
+// Get function to Alpha Blend ARGB pixels and store to destination.
+LIBYUV_API
+ARGBBlendRow GetARGBBlend();
 
 // Alpha Blend ARGB images and store to destination.
 // Source is pre-multiplied by alpha using ARGBAttenuate.
