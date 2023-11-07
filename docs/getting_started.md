@@ -139,11 +139,11 @@ mips
 
 arm disassembly:
 
-    llvm-objdump -d ./out/Release/obj/libyuv/row_common.o >row_common.txt
+    third_party/android_ndk/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-objdump -d ./out/Release/obj/libyuv/row_common.o >row_common.txt
 
-    llvm-objdump -d ./out/Release/obj/libyuv_neon/row_neon.o >row_neon.txt
+    third_party/android_ndk/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-objdump -d ./out/Release/obj/libyuv_neon/row_neon.o >row_neon.txt
 
-    llvm-objdump -d ./out/Release/obj/libyuv_neon/row_neon64.o >row_neon64.txt
+    third_party/android_ndk/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-objdump -d ./out/Release/obj/libyuv_neon/row_neon64.o >row_neon64.txt
 
     Caveat: Disassembly may require optimize_max be disabled in BUILD.gn
 
@@ -238,18 +238,6 @@ After running script, clang & qemu are built in `build-toolchain-qemu/riscv-clan
           -DUSE_RVV=ON .
     cmake --build out/Release/
 
-#### Customized Compiler Flags
-
-Customized compiler flags are supported by `-DRISCV_COMPILER_FLAGS="xxx"`.
-If `-DRISCV_COMPILER_FLAGS="xxx"` is manually assigned, other compile flags(e.g disable -march=xxx) will not be appended.
-
-Example:
-
-    cmake -B out/Release/ -DUNIT_TEST=ON \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_TOOLCHAIN_FILE="./riscv_script/riscv-clang.cmake" \
-          -DRISCV_COMPILER_FLAGS="-mcpu=sifive-x280" \
-          .
 
 ### Run on QEMU
 

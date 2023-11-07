@@ -1,19 +1,14 @@
-# This project was upgraded with external_updater.
-# Usage: tools/external_updater/updater.sh update libyuv
-# For more info, check https://cs.android.com/android/platform/superproject/+/main:tools/external_updater/README.md
-
 name: "libyuv"
-description: "libyuv is an open source project that includes YUV scaling and conversion functionality."
+description:
+    "libyuv is an open source project that includes YUV scaling and conversion "
+    "functionality."
+
 third_party {
   url {
     type: GIT
     value: "https://chromium.googlesource.com/libyuv/libyuv/"
   }
-  version: "f0921806a293e3e008e6325a51d4ea760c39d2c1"
+  version: "2a6cb7431939faba1b40d3f08883847f0cf63572"
+  last_upgrade_date { year: 2023 month: 6 day: 1 }
   license_type: NOTICE
-  last_upgrade_date {
-    year: 2023
-    month: 9
-    day: 5
-  }
 }
