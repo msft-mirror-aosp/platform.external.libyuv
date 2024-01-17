@@ -6,7 +6,7 @@ name: "libyuv"
 description: "libyuv is an open source project that includes YUV scaling and conversion functionality."
 third_party {
   url {
-    type: ARCHIVE
+    type: GIT
     value: "https://chromium.googlesource.com/libyuv/libyuv/"
   }
   version: "f0921806a293e3e008e6325a51d4ea760c39d2c1"
