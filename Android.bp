@@ -1,13 +1,7 @@
 package {
     default_applicable_licenses: ["external_libyuv_license"],
 }
-
 // Added automatically by a large-scale-change
-//
-// large-scale-change included anything that looked like it might be a license
-// text as a license_text. e.g. LICENSE, NOTICE, COPYING etc.
-//
-// Please consider removing redundant or irrelevant files from 'license_text:'.
 // See: http://go/android-license-faq
 license {
     name: "external_libyuv_license",
@@ -20,6 +14,7 @@ license {
         "PATENTS",
     ],
 }
+subdirs = ["files"]
 
 cc_library {
     name: "libyuv",
@@ -133,6 +128,7 @@ cc_test {
         "unit_test/rotate_argb_test.cc",
         "unit_test/rotate_test.cc",
         "unit_test/scale_argb_test.cc",
+        "unit_test/scale_plane_test.cc",
         "unit_test/scale_rgb_test.cc",
         "unit_test/scale_test.cc",
         "unit_test/scale_uv_test.cc",
