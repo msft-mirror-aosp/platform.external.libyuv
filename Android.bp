@@ -21,9 +21,6 @@ cc_library {
     vendor_available: true,
     product_available: true,
     host_supported: true,
-    vndk: {
-        enabled: true,
-    },
 
     srcs: [
         "source/compare.cc",
