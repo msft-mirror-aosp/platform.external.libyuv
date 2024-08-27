@@ -42,9 +42,9 @@ static __inline uint32_t Abs(int32_t v) {
 }
 
 // Parse PYUV format. ie name.1920x800_24Hz_P420.yuv
-static bool ExtractResolutionFromFilename(const char* name,
-                                          int* width_ptr,
-                                          int* height_ptr) {
+bool ExtractResolutionFromFilename(const char* name,
+                                   int* width_ptr,
+                                   int* height_ptr) {
   // Isolate the .width_height. section of the filename by searching for a
   // dot or underscore followed by a digit.
   for (int i = 0; name[i]; ++i) {
@@ -59,7 +59,7 @@ static bool ExtractResolutionFromFilename(const char* name,
   return false;
 }
 
-static void PrintHelp(const char* program) {
+void PrintHelp(const char* program) {
   printf("%s [-options] src_argb.raw dst_yuv.raw\n", program);
   printf(
       " -s <width> <height> .... specify source resolution.  "
@@ -78,7 +78,7 @@ static void PrintHelp(const char* program) {
   exit(0);
 }
 
-static void ParseOptions(int argc, const char* argv[]) {
+void ParseOptions(int argc, const char* argv[]) {
   if (argc <= 1) {
     PrintHelp(argv[0]);
   }
