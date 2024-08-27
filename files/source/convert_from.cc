@@ -446,14 +446,6 @@ int I420ToYUY2(const uint8_t* src_y,
     }
   }
 #endif
-#if defined(HAS_I422TOYUY2ROW_LSX)
-  if (TestCpuFlag(kCpuHasLSX)) {
-    I422ToYUY2Row = I422ToYUY2Row_Any_LSX;
-    if (IS_ALIGNED(width, 16)) {
-      I422ToYUY2Row = I422ToYUY2Row_LSX;
-    }
-  }
-#endif
 #if defined(HAS_I422TOYUY2ROW_LASX)
   if (TestCpuFlag(kCpuHasLASX)) {
     I422ToYUY2Row = I422ToYUY2Row_Any_LASX;
@@ -541,14 +533,6 @@ int I422ToUYVY(const uint8_t* src_y,
     }
   }
 #endif
-#if defined(HAS_I422TOUYVYROW_LSX)
-  if (TestCpuFlag(kCpuHasLSX)) {
-    I422ToUYVYRow = I422ToUYVYRow_Any_LSX;
-    if (IS_ALIGNED(width, 16)) {
-      I422ToUYVYRow = I422ToUYVYRow_LSX;
-    }
-  }
-#endif
 #if defined(HAS_I422TOUYVYROW_LASX)
   if (TestCpuFlag(kCpuHasLASX)) {
     I422ToUYVYRow = I422ToUYVYRow_Any_LASX;
@@ -621,14 +605,6 @@ int I420ToUYVY(const uint8_t* src_y,
     I422ToUYVYRow = I422ToUYVYRow_Any_MSA;
     if (IS_ALIGNED(width, 32)) {
       I422ToUYVYRow = I422ToUYVYRow_MSA;
-    }
-  }
-#endif
-#if defined(HAS_I422TOUYVYROW_LSX)
-  if (TestCpuFlag(kCpuHasLSX)) {
-    I422ToUYVYRow = I422ToUYVYRow_Any_LSX;
-    if (IS_ALIGNED(width, 16)) {
-      I422ToUYVYRow = I422ToUYVYRow_LSX;
     }
   }
 #endif
