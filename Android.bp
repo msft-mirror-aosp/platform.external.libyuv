@@ -21,9 +21,6 @@ cc_library {
     vendor_available: true,
     product_available: true,
     host_supported: true,
-    vndk: {
-        enabled: true,
-    },
 
     srcs: [
         "source/compare.cc",
@@ -94,6 +91,7 @@ cc_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.media.swcodec",
+        "com.android.virt",
     ],
     min_sdk_version: "29",
 }
