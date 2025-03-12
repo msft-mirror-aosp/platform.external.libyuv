@@ -94,6 +94,11 @@ cc_library {
         "com.android.virt",
     ],
     min_sdk_version: "29",
+    // b/336916369: This library gets linked into a rust rlib.  Disable LTO
+    // until cross-language lto is supported.
+    lto: {
+        never: true,
+    },
 }
 
 // compatibilty static library until all uses of libyuv_static are replaced
