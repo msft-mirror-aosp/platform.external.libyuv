@@ -38,8 +38,10 @@ extern "C" {
 #endif
 #endif
 // The following are available on all x86 platforms:
-#if !defined(LIBYUV_DISABLE_X86) && \
-    (defined(_M_IX86) || defined(__x86_64__) || defined(__i386__))
+#if !defined(LIBYUV_DISABLE_X86) &&                             \
+    (defined(_M_IX86) ||                                        \
+     (defined(__x86_64__) && !defined(LIBYUV_ENABLE_ROWWIN)) || \
+     defined(__i386__))
 #define HAS_ARGBAFFINEROW_SSE2
 #endif
 
@@ -77,6 +79,16 @@ void Convert8To16Plane(const uint8_t* src_y,
                        int scale,  // 1024 for 10 bits
                        int width,
                        int height);
+
+LIBYUV_API
+void Convert8To8Plane(const uint8_t* src_y,
+                      int src_stride_y,
+                      uint8_t* dst_y,
+                      int dst_stride_y,
+                      int scale,  // 220 for Y, 225 for U,V
+                      int bias,   // 16
+                      int width,
+                      int height);
 
 // Set a plane of data to a 32 bit value.
 LIBYUV_API
@@ -766,6 +778,10 @@ int ARGBPolynomial(const uint8_t* src_argb,
 
 // Convert plane of 16 bit shorts to half floats.
 // Source values are multiplied by scale before storing as half float.
+//
+// Note: Unlike other libyuv functions that operate on uint16_t buffers, the
+// src_stride_y and dst_stride_y parameters of HalfFloatPlane() are in bytes,
+// not in units of uint16_t.
 LIBYUV_API
 int HalfFloatPlane(const uint16_t* src_y,
                    int src_stride_y,
