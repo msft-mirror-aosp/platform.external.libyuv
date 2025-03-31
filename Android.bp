@@ -76,11 +76,25 @@ cc_library {
         "-fexceptions",
         "-DHAVE_JPEG",
         "-DLIBYUV_UNLIMITED_DATA",
+        // TODO: enable these...
+        "-DLIBYUV_DISABLE_SME",
+        "-DLIBYUV_DISABLE_SVE",
     ],
 
     arch: {
         arm: {
             cflags: ["-mfpu=neon"],
+        },
+        arm64: {
+            cflags: [
+                "-Xclang -target-feature",
+                // This comment prevents bpfmt from sorting the flags incorrectly.
+                "-Xclang +dotprod",
+                // This comment prevents bpfmt from sorting the flags incorrectly.
+                "-Xclang -target-feature",
+                // This comment prevents bpfmt from sorting the flags incorrectly.
+                "-Xclang +i8mm",
+            ],
         },
     },
 
@@ -99,6 +113,10 @@ cc_library {
     lto: {
         never: true,
     },
+    // TODO: enable this...
+//    sanitize: {
+//        cfi: true,
+//    },
 }
 
 // compatibilty static library until all uses of libyuv_static are replaced
