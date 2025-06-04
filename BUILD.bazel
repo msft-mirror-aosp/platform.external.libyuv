@@ -1,4 +1,7 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("@rules_license//rules:license.bzl", "license")
 load("@rules_license//rules:license_kind.bzl", "license_kind")
 
@@ -81,7 +84,7 @@ selects.config_setting_group(
 OS_FLAGS = select({
     ":osx_apple": [
         "-DLIBYUV_NEON",
-        "-march=armv9-a+sve2",
+        "-DLIBYUV_DISABLE_SVE",
     ],
     "//conditions:default": [],
 })
@@ -97,14 +100,15 @@ cc_library(
     name = "libyuv_neon_impl",
     srcs = glob(
         [
-            "source/*neon*.cc",
+            "source/*_neon.cc",
+            "source/*_neon64.cc",
             "include/libyuv/*.h",
         ],
     ),
     copts = ALL_COPTS,
     includes = ["include"],
     visibility = ["//visibility:private"],
-    alwayslink = 1,
+    alwayslink = True,
 )
 
 cc_library(
@@ -146,12 +150,7 @@ cc_library(
         "source/scale_uv.cc",
         "source/scale_win.cc",
         "source/video_common.cc",
-    ] + select(
-        {
-            ":osx_apple": ["source/row_sve.cc"],
-            "//conditions:default": [],
-        },
-    ),
+    ],
     hdrs = [
         "include/libyuv.h",
         "include/libyuv/basic_types.h",
@@ -180,13 +179,12 @@ cc_library(
     ],
     copts = ALL_COPTS,
     includes = ["include"],
-    deps = ["@libjpeg_turbo//:jpeg"] +
-           select({
-               ":aarch64": [
-                   ":libyuv_neon_impl",
-               ],
-               "//conditions:default": [],
-           }),
+    deps = ["@libjpeg_turbo//:jpeg"] + select({
+        ":aarch64": [
+            ":libyuv_neon_impl",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
