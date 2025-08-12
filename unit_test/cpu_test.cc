@@ -101,7 +101,6 @@ TEST_F(LibYUVBaseTest, TestCpuHas) {
     int has_sve = TestCpuFlag(kCpuHasSVE);
     int has_sve2 = TestCpuFlag(kCpuHasSVE2);
     int has_sme = TestCpuFlag(kCpuHasSME);
-    int has_sme2 = TestCpuFlag(kCpuHasSME2);
     printf("Has Arm 0x%x\n", has_arm);
     printf("Has Neon 0x%x\n", has_neon);
     printf("Has Neon DotProd 0x%x\n", has_neon_dotprod);
@@ -109,7 +108,6 @@ TEST_F(LibYUVBaseTest, TestCpuHas) {
     printf("Has SVE 0x%x\n", has_sve);
     printf("Has SVE2 0x%x\n", has_sve2);
     printf("Has SME 0x%x\n", has_sme);
-    printf("Has SME2 0x%x\n", has_sme2);
 
 #if defined(__aarch64__)
     // Read and print the SVE and SME vector lengths.
@@ -342,7 +340,7 @@ static int FileExists(const char* file_name) {
   return 1;
 }
 
-TEST_F(LibYUVBaseTest, DISABLED_TestLinuxArm) {
+TEST_F(LibYUVBaseTest, TestLinuxArm) {
   if (FileExists("../../unit_test/testdata/arm_v7.txt")) {
     printf("Note: testing to load \"../../unit_test/testdata/arm_v7.txt\"\n");
 
@@ -383,12 +381,10 @@ TEST_F(LibYUVBaseTest, TestLinuxAArch64) {
   // Check for SME feature detection.
   expected |= kCpuHasSME;
   EXPECT_EQ(expected, AArch64CpuCaps(0x3fffffffU, 0x82f3ffU));
-
-  // TODO: Check for SME2 feature detection from Apple M4
 }
 #endif
 
-TEST_F(LibYUVBaseTest, DISABLED_TestLinuxMipsMsa) {
+TEST_F(LibYUVBaseTest, TestLinuxMipsMsa) {
   if (FileExists("../../unit_test/testdata/mips.txt")) {
     printf("Note: testing to load \"../../unit_test/testdata/mips.txt\"\n");
 
@@ -401,7 +397,7 @@ TEST_F(LibYUVBaseTest, DISABLED_TestLinuxMipsMsa) {
   }
 }
 
-TEST_F(LibYUVBaseTest, DISABLED_TestLinuxRVV) {
+TEST_F(LibYUVBaseTest, TestLinuxRVV) {
   if (FileExists("../../unit_test/testdata/riscv64.txt")) {
     printf("Note: testing to load \"../../unit_test/testdata/riscv64.txt\"\n");
 
@@ -427,7 +423,12 @@ TEST_F(LibYUVBaseTest, DISABLED_TestLinuxRVV) {
 #endif
 }
 
+// TODO(fbarchard): Fix clangcl test of cpuflags.
+#ifdef _MSC_VER
+TEST_F(LibYUVBaseTest, DISABLED_TestSetCpuFlags) {
+#else
 TEST_F(LibYUVBaseTest, TestSetCpuFlags) {
+#endif
   // Reset any masked flags that may have been set so auto init is enabled.
   MaskCpuFlags(0);
 
