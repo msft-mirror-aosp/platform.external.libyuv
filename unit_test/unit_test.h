@@ -14,12 +14,11 @@
 #include <stddef.h>  // For NULL
 #ifdef _WIN32
 #include <windows.h>
-#elif !defined(__hexagon__)
+#else
 #include <sys/time.h>
 #endif
 
-// pragma to disable warning for ASSERT_NE
-#include <gtest/gtest.h>  // IWYU pragma: export
+#include <gtest/gtest.h>
 
 #include "libyuv/basic_types.h"
 
@@ -101,10 +100,6 @@ static inline double get_time() {
   QueryPerformanceCounter(&t);
   QueryPerformanceFrequency(&f);
   return static_cast<double>(t.QuadPart) / static_cast<double>(f.QuadPart);
-}
-#elif defined(__hexagon__)
-static inline double get_time() {
-  return 0.;
 }
 #else
 static inline double get_time() {

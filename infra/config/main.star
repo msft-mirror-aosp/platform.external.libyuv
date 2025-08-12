@@ -8,9 +8,14 @@ lucicfg.check_version("1.30.9")
 LIBYUV_GIT = "https://chromium.googlesource.com/libyuv/libyuv"
 LIBYUV_GERRIT = "https://chromium-review.googlesource.com/libyuv/libyuv"
 
-RBE_PROJECT = {
-    "ci": "rbe-webrtc-trusted",
-    "try": "rbe-webrtc-untrusted",
+RECLIENT_CI = {
+    "instance": "rbe-webrtc-trusted",
+    "metrics_project": "chromium-reclient-metrics",
+}
+
+RECLIENT_CQ = {
+    "instance": "rbe-webrtc-untrusted",
+    "metrics_project": "chromium-reclient-metrics",
 }
 
 # Use LUCI Scheduler BBv2 names and add Scheduler realms configs.
@@ -233,21 +238,9 @@ def libyuv_try_builder(name, dimensions, properties, recipe_name = "libyuv/libyu
         ),
     )
 
-def get_build_properties(bucket):
-    rbe_project = RBE_PROJECT.get(bucket)
-    return {
-        "$build/siso": {
-            "project": rbe_project,
-            "configs": ["builder"],
-            "enable_cloud_profiler": True,
-            "enable_cloud_trace": True,
-            "enable_monitoring": True,
-        },
-    }
-
 def ci_builder(name, os, category, short_name = None):
     dimensions = get_os_dimensions(os)
-    properties = get_build_properties("ci")
+    properties = {"$build/reclient": RECLIENT_CI}
 
     dimensions["pool"] = "luci.flex.ci"
     properties["builder_group"] = "client.libyuv"
@@ -258,7 +251,7 @@ def ci_builder(name, os, category, short_name = None):
 
 def try_builder(name, os, experiment_percentage = None):
     dimensions = get_os_dimensions(os)
-    properties = get_build_properties("try")
+    properties = {"$build/reclient": RECLIENT_CQ}
 
     dimensions["pool"] = "luci.flex.try"
     properties["builder_group"] = "tryserver.libyuv"
@@ -337,7 +330,6 @@ try_builder("ios_arm64_rel", "ios")
 try_builder("linux", "linux")
 try_builder("linux_asan", "linux")
 try_builder("linux_gcc", "linux", experiment_percentage = 100)
-
 # TODO(libyuv:388428508): Make linux_msan not experimental.
 try_builder("linux_msan", "linux", experiment_percentage = 100)
 try_builder("linux_rel", "linux")
