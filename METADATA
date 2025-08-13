@@ -9,11 +9,11 @@ third_party {
   last_upgrade_date {
     year: 2025
     month: 8
-    day: 8
+    day: 13
   }
   identifier {
     type: "Git"
     value: "https://chromium.googlesource.com/libyuv/libyuv/"
-    version: "b7d97d5f3f8f897b88872b6935e4c996b955bc1f"
+    version: "d71cda1bb0f91d3f2b78cdc5710b30f5941946ce"
   }
 }
