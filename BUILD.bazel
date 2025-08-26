@@ -213,9 +213,9 @@ cc_test(
     copts = ALL_COPTS + ["-DLIBYUV_USE_ABSL_FLAGS"],
     deps = [
         ":libyuv",
-        "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/flags:parse",
-        "@com_google_googletest//:gtest_main",
+        "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/flags:parse",
+        "@googletest//:gtest_main",
     ],
 )
 
