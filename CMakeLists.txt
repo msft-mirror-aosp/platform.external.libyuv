@@ -184,9 +184,12 @@ if(WIN32)
   set_target_properties( ${ly_lib_shared} PROPERTIES IMPORT_PREFIX "lib" )
 endif()
 
-# this creates the cpuid tool
-add_executable      ( cpuid ${ly_base_dir}/util/cpuid.c )
-target_link_libraries  ( cpuid ${ly_lib_static} )
+if(NOT ANDROID)
+  # this creates the cpuid tool
+  add_executable      ( cpuid ${ly_base_dir}/util/cpuid.c )
+  target_compile_definitions(cpuid PRIVATE "_GNU_SOURCE")
+  target_link_libraries  ( cpuid ${ly_lib_static} pthread )
+endif()
 
 # this creates the conversion tool
 add_executable			( yuvconvert ${ly_base_dir}/util/yuvconvert.cc )
