@@ -16,15 +16,8 @@ license {
 }
 subdirs = ["files"]
 
-cc_library {
-    name: "libyuv",
-    vendor_available: true,
-    product_available: true,
-    host_supported: true,
-    vndk: {
-        enabled: true,
-    },
-
+cc_defaults {
+    name: "libyuv_defaults",
     srcs: [
         "source/compare.cc",
         "source/compare_common.cc",
@@ -79,24 +72,48 @@ cc_library {
         "-fexceptions",
         "-DHAVE_JPEG",
         "-DLIBYUV_UNLIMITED_DATA",
+        // TODO: enable these...
+        "-DLIBYUV_DISABLE_SME",
+        "-DLIBYUV_DISABLE_SVE",
     ],
 
+    export_include_dirs: ["include"],
+    shared_libs: ["libjpeg"],
     arch: {
         arm: {
             cflags: ["-mfpu=neon"],
         },
+        arm64: {
+            cflags: [
+                "-Xclang -target-feature",
+                // This comment prevents bpfmt from sorting the flags incorrectly.
+                "-Xclang +dotprod",
+                // This comment prevents bpfmt from sorting the flags incorrectly.
+                "-Xclang -target-feature",
+                // This comment prevents bpfmt from sorting the flags incorrectly.
+                "-Xclang +i8mm",
+            ],
+        },
     },
+}
 
-    shared_libs: ["libjpeg"],
-
-    export_include_dirs: ["include"],
-
+cc_library {
+    name: "libyuv",
+    defaults: ["libyuv_defaults"],
+    vendor_available: true,
+    product_available: true,
+    host_supported: true,
     apex_available: [
         "//apex_available:platform",
         "com.android.media.swcodec",
         "com.android.virt",
     ],
     min_sdk_version: "29",
+    // b/336916369: This library gets linked into a rust rlib.  Disable LTO
+    // until cross-language lto is supported.
+    lto: {
+        never: true,
+    },
 }
 
 // compatibilty static library until all uses of libyuv_static are replaced
@@ -110,6 +127,22 @@ cc_library_static {
         "com.android.media.swcodec",
     ],
     min_sdk_version: "29",
+}
+
+// A static library to support examples/test code with CFI assembly support.
+// It's kept separate from the main 'libyuv' target to not impose and propagate the requirements
+// to all of its dependents, some of which are difficult to resolve and may not be compatible.
+cc_library_static {
+    name: "libyuv_cfi",
+    defaults: ["libyuv_defaults"],
+    vendor_available: true,
+    sanitize: {
+        cfi: true,
+        config: {
+            cfi_assembly_support: true,
+        },
+    },
+    visibility: ["//external/libvpx"],
 }
 
 cc_test {
