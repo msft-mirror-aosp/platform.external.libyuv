@@ -17,6 +17,7 @@ license(
         "@rules_license//licenses/spdx:BSD-3-Clause",
     ],
     license_text = "LICENSE",
+    package_url = "https://chromium.googlesource.com/libyuv/libyuv",
     visibility = ["//visibility:public"],
 )
 
