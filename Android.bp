@@ -1,6 +1,7 @@
 package {
     default_applicable_licenses: ["external_libyuv_license"],
 }
+
 // Added automatically by a large-scale-change
 // See: http://go/android-license-faq
 license {
@@ -14,6 +15,7 @@ license {
         "PATENTS",
     ],
 }
+
 subdirs = ["files"]
 
 cc_defaults {
@@ -22,7 +24,6 @@ cc_defaults {
         "source/compare.cc",
         "source/compare_common.cc",
         "source/compare_gcc.cc",
-        "source/compare_msa.cc",
         "source/compare_neon.cc",
         "source/compare_neon64.cc",
         "source/convert.cc",
@@ -41,13 +42,11 @@ cc_defaults {
         "source/rotate_argb.cc",
         "source/rotate_common.cc",
         "source/rotate_gcc.cc",
-        "source/rotate_msa.cc",
         "source/rotate_neon.cc",
         "source/rotate_neon64.cc",
         "source/row_any.cc",
         "source/row_common.cc",
         "source/row_gcc.cc",
-        "source/row_msa.cc",
         "source/row_neon.cc",
         "source/row_neon64.cc",
         "source/row_rvv.cc",
@@ -56,7 +55,6 @@ cc_defaults {
         "source/scale_argb.cc",
         "source/scale_common.cc",
         "source/scale_gcc.cc",
-        "source/scale_msa.cc",
         "source/scale_neon.cc",
         "source/scale_neon64.cc",
         "source/scale_rgb.cc",
@@ -149,7 +147,10 @@ cc_test {
     name: "libyuv_unittest",
     static_libs: ["libyuv"],
     shared_libs: ["libjpeg"],
-    cflags: ["-Wall", "-Werror"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
     srcs: [
         "unit_test/basictypes_test.cc",
         "unit_test/color_test.cc",
