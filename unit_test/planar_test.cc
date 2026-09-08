@@ -171,14 +171,14 @@ static int TestAttenuateI(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb, kStride * height + off);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
+  align_buffer_page_end(src_argb, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb[i + off] = (fastrand() & 0xff);
   }
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBAttenuate(src_argb + off, kStride, dst_argb_c, kStride, width,
@@ -243,16 +243,16 @@ static int TestUnattenuateI(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb, kStride * height + off);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
+  align_buffer_page_end(src_argb, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb[i + off] = (fastrand() & 0xff);
   }
   ARGBAttenuate(src_argb + off, kStride, src_argb + off, kStride, width,
                 height);
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBUnattenuate(src_argb + off, kStride, dst_argb_c, kStride, width,
@@ -1848,16 +1848,16 @@ static int TestMultiply(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb_a, kStride * height + off);
-  align_buffer_page_end(src_argb_b, kStride * height + off);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
+  align_buffer_page_end(src_argb_a, (size_t)kStride * height + off);
+  align_buffer_page_end(src_argb_b, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
     src_argb_b[i + off] = (fastrand() & 0xff);
   }
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBMultiply(src_argb_a + off, kStride, src_argb_b + off, kStride, dst_argb_c,
@@ -1922,16 +1922,16 @@ static int TestAdd(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb_a, kStride * height + off);
-  align_buffer_page_end(src_argb_b, kStride * height + off);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
+  align_buffer_page_end(src_argb_a, (size_t)kStride * height + off);
+  align_buffer_page_end(src_argb_b, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
     src_argb_b[i + off] = (fastrand() & 0xff);
   }
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBAdd(src_argb_a + off, kStride, src_argb_b + off, kStride, dst_argb_c,
@@ -1996,16 +1996,16 @@ static int TestSubtract(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb_a, kStride * height + off);
-  align_buffer_page_end(src_argb_b, kStride * height + off);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
+  align_buffer_page_end(src_argb_a, (size_t)kStride * height + off);
+  align_buffer_page_end(src_argb_b, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
     src_argb_b[i + off] = (fastrand() & 0xff);
   }
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBSubtract(src_argb_a + off, kStride, src_argb_b + off, kStride, dst_argb_c,
@@ -2070,15 +2070,15 @@ static int TestSobel(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb_a, kStride * height + off);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
-  memset(src_argb_a, 0, kStride * height + off);
+  align_buffer_page_end(src_argb_a, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
+  memset(src_argb_a, 0, (size_t)kStride * height + off);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
   }
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBSobel(src_argb_a + off, kStride, dst_argb_c, kStride, width,
@@ -2216,15 +2216,15 @@ static int TestSobelXY(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb_a, kStride * height + off);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
-  memset(src_argb_a, 0, kStride * height + off);
+  align_buffer_page_end(src_argb_a, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
+  memset(src_argb_a, 0, (size_t)kStride * height + off);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
   }
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBSobelXY(src_argb_a + off, kStride, dst_argb_c, kStride, width,
@@ -2289,16 +2289,16 @@ static int TestBlur(int width,
   }
   const int kBpp = 4;
   const int kStride = width * kBpp;
-  align_buffer_page_end(src_argb_a, kStride * height + off);
-  align_buffer_page_end(dst_cumsum, width * height * 16);
-  align_buffer_page_end(dst_argb_c, kStride * height);
-  align_buffer_page_end(dst_argb_opt, kStride * height);
+  align_buffer_page_end(src_argb_a, (size_t)kStride * height + off);
+  align_buffer_page_end(dst_cumsum, (size_t)width * height * 16);
+  align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
+  align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   for (int i = 0; i < kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
   }
-  memset(dst_cumsum, 0, width * height * 16);
-  memset(dst_argb_c, 0, kStride * height);
-  memset(dst_argb_opt, 0, kStride * height);
+  memset(dst_cumsum, 0, (size_t)width * height * 16);
+  memset(dst_argb_c, 0, (size_t)kStride * height);
+  memset(dst_argb_opt, 0, (size_t)kStride * height);
 
   MaskCpuFlags(disable_cpu_flags);
   ARGBBlur(src_argb_a + off, kStride, dst_argb_c, kStride,
