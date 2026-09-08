@@ -10,6 +10,7 @@ def libyuv_srcs(prefix = ""):
         ],
         exclude = [
             prefix + "source/*neon*.cc",
+            prefix + "source/*rvv*.cc",
             prefix + "source/*sve*.cc",
             prefix + "source/*sme*.cc",
         ],
@@ -27,6 +28,12 @@ def libyuv_hdrs(prefix = ""):
 def libyuv_neon_srcs(prefix = ""):
     return native.glob([
         prefix + "source/*neon*.cc",
+        prefix + "include/libyuv/*.h",
+    ])
+
+def libyuv_rvv_srcs(prefix = ""):
+    return native.glob([
+        prefix + "source/*rvv*.cc",
         prefix + "include/libyuv/*.h",
     ])
 
