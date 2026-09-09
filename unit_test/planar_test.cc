@@ -174,7 +174,7 @@ static int TestAttenuateI(int width,
   align_buffer_page_end(src_argb, (size_t)kStride * height + off);
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb[i + off] = (fastrand() & 0xff);
   }
   memset(dst_argb_c, 0, (size_t)kStride * height);
@@ -189,7 +189,7 @@ static int TestAttenuateI(int width,
                   invert * height);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
@@ -246,7 +246,7 @@ static int TestUnattenuateI(int width,
   align_buffer_page_end(src_argb, (size_t)kStride * height + off);
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb[i + off] = (fastrand() & 0xff);
   }
   ARGBAttenuate(src_argb + off, kStride, src_argb + off, kStride, width,
@@ -263,7 +263,7 @@ static int TestUnattenuateI(int width,
                     invert * height);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
@@ -1852,7 +1852,7 @@ static int TestMultiply(int width,
   align_buffer_page_end(src_argb_b, (size_t)kStride * height + off);
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
     src_argb_b[i + off] = (fastrand() & 0xff);
   }
@@ -1868,7 +1868,7 @@ static int TestMultiply(int width,
                  dst_argb_opt, kStride, width, invert * height);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
@@ -1926,7 +1926,7 @@ static int TestAdd(int width,
   align_buffer_page_end(src_argb_b, (size_t)kStride * height + off);
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
     src_argb_b[i + off] = (fastrand() & 0xff);
   }
@@ -1942,7 +1942,7 @@ static int TestAdd(int width,
             kStride, width, invert * height);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
@@ -2000,7 +2000,7 @@ static int TestSubtract(int width,
   align_buffer_page_end(src_argb_b, (size_t)kStride * height + off);
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
     src_argb_b[i + off] = (fastrand() & 0xff);
   }
@@ -2016,7 +2016,7 @@ static int TestSubtract(int width,
                  dst_argb_opt, kStride, width, invert * height);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
@@ -2074,7 +2074,7 @@ static int TestSobel(int width,
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   memset(src_argb_a, 0, (size_t)kStride * height + off);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
   }
   memset(dst_argb_c, 0, (size_t)kStride * height);
@@ -2089,7 +2089,7 @@ static int TestSobel(int width,
               invert * height);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
@@ -2220,7 +2220,7 @@ static int TestSobelXY(int width,
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
   memset(src_argb_a, 0, (size_t)kStride * height + off);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
   }
   memset(dst_argb_c, 0, (size_t)kStride * height);
@@ -2235,7 +2235,7 @@ static int TestSobelXY(int width,
                 invert * height);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
@@ -2293,7 +2293,7 @@ static int TestBlur(int width,
   align_buffer_page_end(dst_cumsum, (size_t)width * height * 16);
   align_buffer_page_end(dst_argb_c, (size_t)kStride * height);
   align_buffer_page_end(dst_argb_opt, (size_t)kStride * height);
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     src_argb_a[i + off] = (fastrand() & 0xff);
   }
   memset(dst_cumsum, 0, (size_t)width * height * 16);
@@ -2311,7 +2311,7 @@ static int TestBlur(int width,
              invert * height, radius);
   }
   int max_diff = 0;
-  for (int i = 0; i < kStride * height; ++i) {
+  for (size_t i = 0; i < (size_t)kStride * height; ++i) {
     int abs_diff = abs(static_cast<int>(dst_argb_c[i]) -
                        static_cast<int>(dst_argb_opt[i]));
     if (abs_diff > max_diff) {
