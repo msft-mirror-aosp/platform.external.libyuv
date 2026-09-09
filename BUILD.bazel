@@ -36,7 +36,7 @@ SUPPORTS_SVE_COPTS = [
 ]
 
 ENABLE_SVE_COPTS = [
-    "-march=armv9-a+i8mm+sve2",
+    "-march=armv8.5-a+i8mm+sve2",
 ]
 
 SVE_COPTS = select({

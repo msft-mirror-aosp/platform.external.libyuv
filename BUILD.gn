@@ -248,8 +248,8 @@ if (libyuv_use_sve) {
     # The -march arguments below are incompatible with libc++ modules.
     use_libcxx_modules = false
 
-    # SVE2 is an Armv9-A feature.
-    cflags = [ "-march=armv9-a+i8mm+sve2" ]
+    # SVE2 is an Armv9-A feature, but use Armv8.5-A for compatibility.
+    cflags = [ "-march=armv8.5-a+i8mm+sve2" ]
   }
 }
 
@@ -268,8 +268,9 @@ if (libyuv_use_sme) {
     # The -march arguments below are incompatible with libc++ modules.
     use_libcxx_modules = false
 
-    # SME is an Armv9-A feature.
-    cflags = [ "-march=armv9-a+i8mm+sme" ]
+    # SME is an Armv9-A feature, but use Armv8.5-A for compatibility with
+    # processors like Apple M4/M5 that support SME without SVE.
+    cflags = [ "-march=armv8.5-a+i8mm+sme" ]
   }
 }
 
