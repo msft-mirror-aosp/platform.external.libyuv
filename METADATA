@@ -16,4 +16,9 @@ third_party {
     value: "https://chromium.googlesource.com/libyuv/libyuv/"
     version: "826ab02fcc1af3f45041cef574b318b659802f5d"
   }
+  security: {
+    tag: "android:on_device_usage"
+    tag: "android:privilege_level:privileged"
+    tag: "android:untrusted_input"
+  }
 }
