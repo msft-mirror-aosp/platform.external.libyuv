@@ -3265,6 +3265,14 @@ int I420Blend(const uint8_t* src_y0,
     }
   }
 #endif
+#if defined(HAS_SCALEROWDOWN2_AVX512BW)
+  if (TestCpuFlag(kCpuHasAVX512BW)) {
+    ScaleRowDown2 = ScaleRowDown2Box_Odd_AVX512BW;
+    if (IS_ALIGNED(width, 2)) {
+      ScaleRowDown2 = ScaleRowDown2Box_AVX512BW;
+    }
+  }
+#endif
 #if defined(HAS_SCALEROWDOWN2_RVV)
   if (TestCpuFlag(kCpuHasRVV)) {
     ScaleRowDown2 = ScaleRowDown2Box_RVV;

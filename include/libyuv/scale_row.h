@@ -98,6 +98,7 @@ extern "C" {
     !defined(LIBYUV_ENABLE_ROWWIN)
 #define HAS_SCALEADDROW_AVX512BW
 #define HAS_SCALEADDCOLS_AVX512BW
+#define HAS_SCALEROWDOWN2_AVX512BW
 #endif
 
 // The following are available on Neon platforms:
@@ -580,6 +581,22 @@ void ScaleRowDown2Box_AVX2(const uint8_t* src_ptr,
                            ptrdiff_t src_stride,
                            uint8_t* dst_ptr,
                            int dst_width);
+void ScaleRowDown2_AVX512BW(const uint8_t* src_ptr,
+                            ptrdiff_t src_stride,
+                            uint8_t* dst_ptr,
+                            int dst_width);
+void ScaleRowDown2Linear_AVX512BW(const uint8_t* src_ptr,
+                                  ptrdiff_t src_stride,
+                                  uint8_t* dst_ptr,
+                                  int dst_width);
+void ScaleRowDown2Box_AVX512BW(const uint8_t* src_ptr,
+                               ptrdiff_t src_stride,
+                               uint8_t* dst_ptr,
+                               int dst_width);
+void ScaleRowDown2Box_Odd_AVX512BW(const uint8_t* src_ptr,
+                                   ptrdiff_t src_stride,
+                                   uint8_t* dst_ptr,
+                                   int dst_width);
 void ScaleRowDown4_SSSE3(const uint8_t* src_ptr,
                          ptrdiff_t src_stride,
                          uint8_t* dst_ptr,

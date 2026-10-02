@@ -114,6 +114,15 @@ static void ScalePlaneDown2(int src_width,
     }
   }
 #endif
+#if defined(HAS_SCALEROWDOWN2_AVX512BW)
+  if (TestCpuFlag(kCpuHasAVX512BW)) {
+    ScaleRowDown2 =
+        filtering == kFilterNone
+            ? ScaleRowDown2_AVX512BW
+            : (filtering == kFilterLinear ? ScaleRowDown2Linear_AVX512BW
+                                          : ScaleRowDown2Box_AVX512BW);
+  }
+#endif
 #if defined(HAS_SCALEROWDOWN2_LSX)
   if (TestCpuFlag(kCpuHasLSX)) {
     ScaleRowDown2 =
