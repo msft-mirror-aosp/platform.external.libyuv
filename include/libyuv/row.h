@@ -314,8 +314,8 @@ extern "C" {
 #define HAS_COMPUTECUMULATIVESUMROW_AVX2
 #define HAS_CUMULATIVESUMTOAVERAGEROW_AVX2
 #define HAS_I422TOAR30ROW_AVX2
-#define HAS_RAWTORGB24ROW_AVX2
 #endif
+#define HAS_RAWTORGB24ROW_AVX2
 #define HAS_I422TOUYVYROW_AVX2
 #define HAS_I422TOYUY2ROW_AVX2
 #define HAS_MERGEAR64ROW_AVX2
@@ -354,6 +354,8 @@ extern "C" {
      defined(_M_IX86)) &&                                           \
     ((defined(_MSC_VER) && !defined(__clang__)) ||                  \
      defined(LIBYUV_ENABLE_ROWWIN))
+#define HAS_RAWTORGB24ROW_SSSE3
+#define HAS_RAWTORGB24ROW_AVX2
 #define HAS_RAWTOARGBROW_AVX2
 #define HAS_I422TORGB24ROW_AVX2
 #define HAS_RGB24TOARGBROW_AVX2
@@ -372,7 +374,6 @@ extern "C" {
 #define HAS_CONVERT8TO16ROW_AVX2
 #if defined(__x86_64__) || defined(_M_X64)
 #define HAS_I422TOAR30ROW_AVX2
-#define HAS_RAWTORGB24ROW_AVX2
 #define HAS_RAWTOARGBROW_AVX512BW
 #define HAS_RGB24TOARGBROW_AVX512BW
 #define HAS_RAWTORGB24ROW_AVX512BW
@@ -851,6 +852,7 @@ extern "C" {
 #define HAS_NV12TORGB565ROW_LASX
 #define HAS_NV21TOARGBROW_LASX
 #define HAS_RAWTOARGBROW_LASX
+#define HAS_RAWTORGB24ROW_LASX
 #define HAS_RAWTOUVROW_LASX
 #define HAS_RGB24TOARGBROW_LASX
 #define HAS_RGB24TOUVROW_LASX
@@ -4027,6 +4029,7 @@ void RAWToRGBARow_RVV(const uint8_t* src_raw, uint8_t* dst_rgba, int width);
 void RAWToRGB24Row_NEON(const uint8_t* src_raw, uint8_t* dst_rgb24, int width);
 void RAWToRGB24Row_SVE2(const uint8_t* src_raw, uint8_t* dst_rgb24, int width);
 void RAWToRGB24Row_LSX(const uint8_t* src_raw, uint8_t* dst_rgb24, int width);
+void RAWToRGB24Row_LASX(const uint8_t* src_raw, uint8_t* dst_rgb24, int width);
 void RAWToRGB24Row_RVV(const uint8_t* src_raw, uint8_t* dst_rgb24, int width);
 void RGB565ToARGBRow_NEON(const uint8_t* src_rgb565,
                           uint8_t* dst_argb,
@@ -4136,6 +4139,9 @@ void RAWToRGB24Row_Any_NEON(const uint8_t* src_ptr,
                             uint8_t* dst_ptr,
                             int width);
 void RAWToRGB24Row_Any_LSX(const uint8_t* src_ptr, uint8_t* dst_ptr, int width);
+void RAWToRGB24Row_Any_LASX(const uint8_t* src_ptr,
+                            uint8_t* dst_ptr,
+                            int width);
 void RGB565ToARGBRow_Any_NEON(const uint8_t* src_ptr,
                               uint8_t* dst_ptr,
                               int width);

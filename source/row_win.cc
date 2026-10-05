@@ -31,12 +31,14 @@ extern "C" {
 #endif
 
 #if defined(__clang__) || defined(__GNUC__)
+#define LIBYUV_TARGET_SSSE3 __attribute__((target("ssse3")))
 #define LIBYUV_TARGET_AVX2 __attribute__((target("avx2")))
 #define LIBYUV_TARGET_AVX512BW \
   __attribute__((target("avx512bw,avx512vl,avx512f")))
 #define LIBYUV_TARGET_AVX512VBMI \
   __attribute__((target("avx512vbmi,avx512bw,avx512vl,avx512f")))
 #else
+#define LIBYUV_TARGET_SSSE3
 #define LIBYUV_TARGET_AVX2
 #define LIBYUV_TARGET_AVX512BW
 #define LIBYUV_TARGET_AVX512VBMI
@@ -338,6 +340,23 @@ static const uint8_t kShuffleMaskRAWToARGB_AVX512BW[32] = {
     7u,   128u, 12u, 11u,  10u,  128u, 15u, 14u,  13u,  128u};
 #endif  // defined(HAS_RAWTOARGBROW_AVX512BW)
 
+#if defined(HAS_RAWTORGB24ROW_SSSE3)
+// Shuffle table for converting RAW to RGB24.  First 8.
+static const uint8_t kShuffleMaskRAWToRGB24_0[16] = {
+    2u,   1u,   0u,   5u,   4u,   3u,   8u,   7u,
+    128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u};
+
+// Shuffle table for converting RAW to RGB24.  Middle 8.
+static const uint8_t kShuffleMaskRAWToRGB24_1[16] = {
+    2u,   7u,   6u,   5u,   10u,  9u,   8u,   13u,
+    128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u};
+
+// Shuffle table for converting RAW to RGB24.  Last 8.
+static const uint8_t kShuffleMaskRAWToRGB24_2[16] = {
+    8u,   7u,   12u,  11u,  10u,  15u,  14u,  13u,
+    128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u};
+#endif  // defined(HAS_RAWTORGB24ROW_SSSE3)
+
 #if defined(HAS_RAWTORGB24ROW_AVX2) || defined(HAS_RAWTORGB24ROW_AVX512BW)
 static const uint8_t kShuffleMaskRAWToRGB24_AVX2[32] = {
     2u,  1u,   0u,   5u,   4u,   3u,  8u,   7u,   6u,   11u, 10u,
@@ -347,11 +366,9 @@ static const uint8_t kShuffleMaskRAWToRGB24_AVX2[32] = {
         // defined(HAS_RAWTORGB24ROW_AVX512BW)
 
 #if defined(HAS_RAWTORGB24ROW_AVX2)
-static const uint32_t kPermd0_AVX2[8] = {0, 1, 2, 4, 5, 6, 0, 0};
-static const uint32_t kPermd1_AVX2[8] = {2, 4, 5, 6, 0, 0, 0, 0};
-static const uint32_t kPermd2_AVX2[8] = {0, 0, 0, 0, 0, 1, 2, 4};
-static const uint32_t kPermd3_AVX2[8] = {5, 6, 0, 0, 0, 0, 0, 0};
-static const uint32_t kPermd4_AVX2[8] = {0, 0, 0, 1, 2, 4, 5, 6};
+static const uint32_t kPermd0_AVX2[8] = {0, 1, 2, 4, 5, 6, 3, 7};
+static const uint32_t kPermd1_AVX2[8] = {2, 4, 5, 6, 3, 7, 0, 1};
+static const uint32_t kPermd2_AVX2[8] = {5, 6, 3, 7, 0, 1, 2, 4};
 #endif  // defined(HAS_RAWTORGB24ROW_AVX2)
 
 #if defined(HAS_RAWTORGB24ROW_AVX512BW)
@@ -466,6 +483,35 @@ void RGB24ToARGBRow_AVX512BW(const uint8_t* src_rgb24,
 }
 #endif  // HAS_RGB24TOARGBROW_AVX512BW
 
+#ifdef HAS_RAWTORGB24ROW_SSSE3
+LIBYUV_TARGET_SSSE3
+void RAWToRGB24Row_SSSE3(const uint8_t* src_raw,
+                         uint8_t* dst_rgb24,
+                         int width) {
+  __m128i shuf0 = _mm_loadu_si128((const __m128i*)kShuffleMaskRAWToRGB24_0);
+  __m128i shuf1 = _mm_loadu_si128((const __m128i*)kShuffleMaskRAWToRGB24_1);
+  __m128i shuf2 = _mm_loadu_si128((const __m128i*)kShuffleMaskRAWToRGB24_2);
+
+  while (width > 0) {
+    __m128i raw0 = _mm_loadu_si128((const __m128i*)src_raw);
+    __m128i raw1 = _mm_loadu_si128((const __m128i*)(src_raw + 4));
+    __m128i raw2 = _mm_loadu_si128((const __m128i*)(src_raw + 8));
+
+    raw0 = _mm_shuffle_epi8(raw0, shuf0);
+    raw1 = _mm_shuffle_epi8(raw1, shuf1);
+    raw2 = _mm_shuffle_epi8(raw2, shuf2);
+
+    _mm_storel_epi64((__m128i*)dst_rgb24, raw0);
+    _mm_storel_epi64((__m128i*)(dst_rgb24 + 8), raw1);
+    _mm_storel_epi64((__m128i*)(dst_rgb24 + 16), raw2);
+
+    src_raw += 24;
+    dst_rgb24 += 24;
+    width -= 8;
+  }
+}
+#endif  // HAS_RAWTORGB24ROW_SSSE3
+
 #ifdef HAS_RAWTORGB24ROW_AVX2
 LIBYUV_TARGET_AVX2
 void RAWToRGB24Row_AVX2(const uint8_t* src_raw, uint8_t* dst_rgb24, int width) {
@@ -474,44 +520,40 @@ void RAWToRGB24Row_AVX2(const uint8_t* src_raw, uint8_t* dst_rgb24, int width) {
   __m256i ymm_p0 = _mm256_loadu_si256((const __m256i*)kPermd0_AVX2);
   __m256i ymm_p1 = _mm256_loadu_si256((const __m256i*)kPermd1_AVX2);
   __m256i ymm_p2 = _mm256_loadu_si256((const __m256i*)kPermd2_AVX2);
-  __m256i ymm_p3 = _mm256_loadu_si256((const __m256i*)kPermd3_AVX2);
-  __m256i ymm_p4 = _mm256_loadu_si256((const __m256i*)kPermd4_AVX2);
 
   while (width > 0) {
     __m256i raw0 = _mm256_loadu_si256((const __m256i*)src_raw);
     __m256i raw1 = _mm256_loadu_si256((const __m256i*)(src_raw + 32));
     __m256i raw2 = _mm256_loadu_si256((const __m256i*)(src_raw + 64));
 
-    __m256i b0 = _mm256_permute4x64_epi64(raw0, 0x94);
     __m256i m01 = _mm256_permute2x128_si256(raw0, raw1, 0x21);
-    __m256i b1 = _mm256_permute4x64_epi64(m01, 0xe9);
-
+    __m256i b0 = _mm256_permute4x64_epi64(raw0, 0x94);
     __m256i m12 = _mm256_permute2x128_si256(raw1, raw2, 0x21);
-    __m256i b2 = _mm256_permute4x64_epi64(m12, 0x94);
     __m256i b3 = _mm256_permute4x64_epi64(raw2, 0xe9);
+    __m256i b1 = _mm256_permute4x64_epi64(m01, 0xe9);
+    __m256i b2 = _mm256_permute4x64_epi64(m12, 0x94);
 
     b0 = _mm256_shuffle_epi8(b0, ymm_shuf);
     b1 = _mm256_shuffle_epi8(b1, ymm_shuf);
     b2 = _mm256_shuffle_epi8(b2, ymm_shuf);
     b3 = _mm256_shuffle_epi8(b3, ymm_shuf);
 
-    // Dst0 = blend(b0_dwords, b1_q0)
     __m256i d0 = _mm256_permutevar8x32_epi32(b0, ymm_p0);
-    __m256i b1_q0 = _mm256_permute4x64_epi64(b1, 0x00);
-    __m256i dst0 = _mm256_blend_epi32(d0, b1_q0, 0xc0);
-
-    // Dst1 = blend(b1_dwords, b2_dwords)
     __m256i d1 = _mm256_permutevar8x32_epi32(b1, ymm_p1);
     __m256i d2 = _mm256_permutevar8x32_epi32(b2, ymm_p2);
-    __m256i dst1 = _mm256_blend_epi32(d1, d2, 0xf0);
+    __m256i d3 = _mm256_permutevar8x32_epi32(b3, ymm_p0);
 
-    // Dst2 = blend(b2_dwords, b3_dwords)
-    __m256i d2_c45 = _mm256_permutevar8x32_epi32(b2, ymm_p3);
-    __m256i d3 = _mm256_permutevar8x32_epi32(b3, ymm_p4);
-    __m256i dst2 = _mm256_blend_epi32(d2_c45, d3, 0xfc);
-
+    // Dst0 = blend(d0, d1)
+    __m256i dst0 = _mm256_blend_epi32(d0, d1, 0xc0);
     _mm256_storeu_si256((__m256i*)dst_rgb24, dst0);
+
+    // Dst1 = blend(d1, d2)
+    __m256i dst1 = _mm256_blend_epi32(d1, d2, 0xf0);
+    d3 = _mm256_permute4x64_epi64(d3, 0x90);
     _mm256_storeu_si256((__m256i*)(dst_rgb24 + 32), dst1);
+
+    // Dst2 = blend(d2, d3)
+    __m256i dst2 = _mm256_blend_epi32(d2, d3, 0xfc);
     _mm256_storeu_si256((__m256i*)(dst_rgb24 + 64), dst2);
 
     src_raw += 96;

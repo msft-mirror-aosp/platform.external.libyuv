@@ -2279,7 +2279,7 @@ void RAWToRGB24Row_LSX(const uint8_t* src_raw, uint8_t* dst_rgb24, int width) {
     src2 = __lsx_vld(src_raw, 32);
     DUP2_ARG3(__lsx_vshuf_b, src1, src0, shuf0, src1, src0, shuf1, dst0, dst1);
     dst2 = __lsx_vshuf_b(src1, src2, shuf2);
-    dst1 = __lsx_vinsgr2vr_b(dst1, src_raw[32], 0x0E);
+    dst1 = __lsx_vextrins_b(dst1, src2, 0xE0);
     __lsx_vst(dst0, dst_rgb24, 0);
     __lsx_vst(dst1, dst_rgb24, 16);
     __lsx_vst(dst2, dst_rgb24, 32);

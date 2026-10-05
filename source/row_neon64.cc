@@ -2058,12 +2058,12 @@ void RAWToRGBARow_NEON(const uint8_t* src_raw, uint8_t* dst_rgba, int width) {
 void RAWToRGB24Row_NEON(const uint8_t* src_raw, uint8_t* dst_rgb24, int width) {
   asm volatile(
       "1:          \n"
-      "ld3         {v0.8b,v1.8b,v2.8b}, [%0], #24 \n"  // read r g b
-      "subs        %w2, %w2, #8                  \n"   // 8 processed per loop.
-      "mov         v3.8b, v1.8b                  \n"   // move g
+      "ld3         {v0.16b,v1.16b,v2.16b}, [%0], #48 \n"  // read 16 r g b
+      "subs        %w2, %w2, #16                 \n"      // 16 per loop.
+      "mov         v3.16b, v1.16b                \n"      // move g
       "prfm        pldl1keep, [%0, 448]          \n"
-      "mov         v4.8b, v0.8b                  \n"   // move r
-      "st3         {v2.8b,v3.8b,v4.8b}, [%1], #24 \n"  // store b g r
+      "mov         v4.16b, v0.16b                \n"      // move r
+      "st3         {v2.16b,v3.16b,v4.16b}, [%1], #48 \n"  // store 16 b g r
       "b.gt        1b                            \n"
       : "+r"(src_raw),    // %0
         "+r"(dst_rgb24),  // %1

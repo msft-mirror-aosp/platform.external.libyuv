@@ -3625,7 +3625,7 @@ int RAWToRGB24(const uint8_t* src_raw,
 #if defined(HAS_RAWTORGB24ROW_NEON)
   if (TestCpuFlag(kCpuHasNEON)) {
     RAWToRGB24Row = RAWToRGB24Row_Any_NEON;
-    if (IS_ALIGNED(width, 8)) {
+    if (IS_ALIGNED(width, 16)) {
       RAWToRGB24Row = RAWToRGB24Row_NEON;
     }
   }
@@ -3640,6 +3640,14 @@ int RAWToRGB24(const uint8_t* src_raw,
     RAWToRGB24Row = RAWToRGB24Row_Any_LSX;
     if (IS_ALIGNED(width, 16)) {
       RAWToRGB24Row = RAWToRGB24Row_LSX;
+    }
+  }
+#endif
+#if defined(HAS_RAWTORGB24ROW_LASX)
+  if (TestCpuFlag(kCpuHasLASX)) {
+    RAWToRGB24Row = RAWToRGB24Row_Any_LASX;
+    if (IS_ALIGNED(width, 32)) {
+      RAWToRGB24Row = RAWToRGB24Row_LASX;
     }
   }
 #endif

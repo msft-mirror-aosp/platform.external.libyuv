@@ -1372,17 +1372,18 @@ void RAWToRGBARow_NEON(const uint8_t* src_raw, uint8_t* dst_rgba, int width) {
 void RAWToRGB24Row_NEON(const uint8_t* src_raw, uint8_t* dst_rgb24, int width) {
   asm volatile(
       "1:          \n"
-      "vld3.8      {d1, d2, d3}, [%0]!           \n"  // load 8 pixels of RAW.
-      "subs        %2, %2, #8                    \n"  // 8 processed per loop.
-      "vswp.u8     d1, d3                        \n"  // swap R, B
-      "vst3.8      {d1, d2, d3}, [%1]!           \n"  // store 8 pixels of
-                                                      // RGB24.
+      "vld3.8      {d0, d2, d4}, [%0]!           \n"  // load 16 pixels of RAW.
+      "vld3.8      {d1, d3, d5}, [%0]!           \n"
+      "subs        %2, %2, #16                   \n"  // 16 processed per loop.
+      "vswp.u8     q0, q2                        \n"  // swap R, B
+      "vst3.8      {d0, d2, d4}, [%1]!           \n"  // store 16 pixels of
+      "vst3.8      {d1, d3, d5}, [%1]!           \n"  // RGB24.
       "bgt         1b                            \n"
       : "+r"(src_raw),    // %0
         "+r"(dst_rgb24),  // %1
         "+r"(width)       // %2
       :
-      : "cc", "memory", "d1", "d2", "d3"  // Clobber List
+      : "cc", "memory", "q0", "q1", "q2"  // Clobber List
   );
 }
 
