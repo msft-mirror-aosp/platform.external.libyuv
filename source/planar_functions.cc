@@ -3656,6 +3656,14 @@ int RAWToRGB24(const uint8_t* src_raw,
     RAWToRGB24Row = RAWToRGB24Row_RVV;
   }
 #endif
+#if defined(HAS_RAWTORGB24ROW_WASMSIMD)
+  if (TestCpuFlag(kCpuHasWASMSIMD)) {
+    RAWToRGB24Row = RAWToRGB24Row_Any_WASMSIMD;
+    if (IS_ALIGNED(width, 16)) {
+      RAWToRGB24Row = RAWToRGB24Row_WASMSIMD;
+    }
+  }
+#endif
 
   for (y = 0; y < height; ++y) {
     RAWToRGB24Row(src_raw, dst_rgb24, width);

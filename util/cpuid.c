@@ -136,6 +136,15 @@ int main(int argc, const char* argv[]) {
   }
 #endif  // defined(__loongarch__)
 
+#if defined(__wasm__)
+  int has_wasm = TestCpuFlag(kCpuHasWASM);
+  if (has_wasm) {
+    int has_wasm_simd = TestCpuFlag(kCpuHasWASMSIMD);
+    printf("Has WASM 0x%x\n", has_wasm);
+    printf("Has WASM SIMD 0x%x\n", has_wasm_simd);
+  }
+#endif  // defined(__wasm__)
+
 #if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || \
     defined(_M_X64)
   int has_x86 = TestCpuFlag(kCpuHasX86);

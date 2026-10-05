@@ -48,6 +48,9 @@ config("libyuv_config") {
   if (!libyuv_use_lasx) {
     defines += [ "LIBYUV_DISABLE_LASX" ]
   }
+  if (current_cpu == "wasm") {
+    cflags_cc = [ "-msimd128" ]
+  }
 }
 
 # This target is built when no specific target is specified on the command line.
@@ -166,6 +169,7 @@ static_library("libyuv_internal") {
     "source/row_any.cc",
     "source/row_common.cc",
     "source/row_gcc.cc",
+    "source/row_wasm.cc",
     "source/row_win.cc",
     "source/scale.cc",
     "source/scale_any.cc",

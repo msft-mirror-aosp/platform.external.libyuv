@@ -46,6 +46,7 @@ set ( ly_common_source_files
   ${ly_src_dir}/row_common.cc
   ${ly_src_dir}/row_gcc.cc
   ${ly_src_dir}/row_rvv.cc
+  ${ly_src_dir}/row_wasm.cc
   ${ly_src_dir}/row_win.cc
   ${ly_src_dir}/scale.cc
   ${ly_src_dir}/scale_any.cc
@@ -173,6 +174,11 @@ int main(void) { return 0; }
     else()
       add_definitions(-DLIBYUV_DISABLE_RVV)
     endif()
+  endif()
+
+  if(arch_lowercase MATCHES "^wasm" OR EMSCRIPTEN)
+    set(CMAKE_C_FLAGS "-msimd128 ${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-msimd128 ${CMAKE_CXX_FLAGS}")
   endif()
 endif()
 
