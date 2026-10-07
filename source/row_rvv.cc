@@ -2355,10 +2355,10 @@ void ARGBExtractAlphaRow_RVV(const uint8_t* src_argb,
   int vl;
   asm volatile(
       "1:          \n"
-      "vsetvli     %[vl], %[w], e16, m2, ta, ma  \n"
+      "vsetvli     %[vl], %[w], e16, m4, ta, ma  \n"
       "vle32.v     v8, (%[src_argb])             \n"
       "vnsrl.wi    v16, v8, 16                   \n"
-      "vsetvli     zero, zero, e8, m1, ta, ma    \n"
+      "vsetvli     zero, zero, e8, m2, ta, ma    \n"
       "vnsrl.wi    v8, v16, 8                    \n"
       "vse8.v      v8, (%[dst_a])                \n"
       "sub         %[w], %[w], %[vl]             \n"
@@ -2371,7 +2371,8 @@ void ARGBExtractAlphaRow_RVV(const uint8_t* src_argb,
         [w] "+r"(width),            // %[w]
         [vl] "=&r"(vl)              // %[vl]
       :
-      : RVV_VL_CLOBBER "memory", "v8", "v9", "v10", "v11", "v16", "v17");
+      : RVV_VL_CLOBBER "memory", "v8", "v9", "v10", "v11", "v12", "v13", "v14",
+        "v15", "v16", "v17", "v18", "v19");
 }
 #endif
 
@@ -2379,23 +2380,28 @@ void ARGBExtractAlphaRow_RVV(const uint8_t* src_argb,
 void ARGBCopyYToAlphaRow_RVV(const uint8_t* src, uint8_t* dst, int width) {
   int vl;
   asm volatile(
-      "addi        %[dst], %[dst], 3             \n"
-
       "1:          \n"
-      "vsetvli     %[vl], %[w], e8, m4, ta, ma   \n"
-      "vle8.v      v8, (%[src])                  \n"
-      "vsse8.v     v8, (%[dst]), %[dst_stride]   \n"
+      "vsetvli     %[vl], %[w], e32, m8, ta, ma  \n"
+      "vle8.v      v16, (%[src])                 \n"
+      "vle32.v     v8, (%[dst])                  \n"
+      "vzext.vf4   v24, v16                      \n"
+      "vand.vx     v8, v8, %[mask]               \n"
+      "vsll.vi     v24, v24, 24                  \n"
+      "vor.vv      v8, v8, v24                   \n"
+      "vse32.v     v8, (%[dst])                  \n"
       "sub         %[w], %[w], %[vl]             \n"
       "add         %[src], %[src], %[vl]         \n"
       "slli        %[vl], %[vl], 2               \n"
       "add         %[dst], %[dst], %[vl]         \n"
       "bgtz        %[w], 1b                      \n"
-      : [src] "+r"(src),     // %[src]
-        [dst] "+r"(dst),     // %[dst]
-        [w] "+r"(width),     // %[w]
-        [vl] "=&r"(vl)       // %[vl]
-      : [dst_stride] "r"(4)  // %[dst_stride]
-      : RVV_VL_CLOBBER "memory", "v8", "v9", "v10", "v11");
+      : [src] "+r"(src),         // %[src]
+        [dst] "+r"(dst),         // %[dst]
+        [w] "+r"(width),         // %[w]
+        [vl] "=&r"(vl)           // %[vl]
+      : [mask] "r"(0x00ffffffu)  // %[mask]
+      : RVV_VL_CLOBBER "memory", "v8", "v9", "v10", "v11", "v12", "v13", "v14",
+        "v15", "v16", "v17", "v24", "v25", "v26", "v27", "v28", "v29", "v30",
+        "v31");
 }
 #endif
 

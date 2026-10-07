@@ -1321,6 +1321,14 @@ ANY11(ARGBExtractAlphaRow_Any_NEON, ARGBExtractAlphaRow_NEON, 0, 4, 1, 15)
 #ifdef HAS_ARGBEXTRACTALPHAROW_LSX
 ANY11(ARGBExtractAlphaRow_Any_LSX, ARGBExtractAlphaRow_LSX, 0, 4, 1, 15)
 #endif
+#ifdef HAS_ARGBEXTRACTALPHAROW_WASMSIMD
+ANY11(ARGBExtractAlphaRow_Any_WASMSIMD,
+      ARGBExtractAlphaRow_WASMSIMD,
+      0,
+      4,
+      1,
+      15)
+#endif
 #ifdef HAS_RAWTOARGBROW_WASMSIMD
 ANY11(RAWToARGBRow_Any_WASMSIMD, RAWToARGBRow_WASMSIMD, 0, 3, 4, 15)
 #endif
@@ -1386,6 +1394,17 @@ ANY11B(ARGBCopyYToAlphaRow_Any_AVX2, ARGBCopyYToAlphaRow_AVX2, 0, 1, 4, 15)
 #endif
 #ifdef HAS_ARGBCOPYYTOALPHAROW_SSE2
 ANY11B(ARGBCopyYToAlphaRow_Any_SSE2, ARGBCopyYToAlphaRow_SSE2, 0, 1, 4, 7)
+#endif
+#ifdef HAS_ARGBCOPYYTOALPHAROW_NEON
+ANY11B(ARGBCopyYToAlphaRow_Any_NEON, ARGBCopyYToAlphaRow_NEON, 0, 1, 4, 15)
+#endif
+#ifdef HAS_ARGBCOPYYTOALPHAROW_WASMSIMD
+ANY11B(ARGBCopyYToAlphaRow_Any_WASMSIMD,
+       ARGBCopyYToAlphaRow_WASMSIMD,
+       0,
+       1,
+       4,
+       15)
 #endif
 #undef ANY11B
 

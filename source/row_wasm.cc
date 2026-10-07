@@ -1914,6 +1914,62 @@ void BlendPlaneRow_WASMSIMD(const uint8_t* src0,
 }
 #endif  // HAS_BLENDPLANEROW_WASMSIMD
 
+#ifdef HAS_ARGBEXTRACTALPHAROW_WASMSIMD
+void ARGBExtractAlphaRow_WASMSIMD(const uint8_t* src_argb,
+                                  uint8_t* dst_a,
+                                  int width) {
+  do {
+    asm("" : "+r"(src_argb), "+r"(dst_a));
+    v128_t s0 = wasm_v128_load(src_argb);
+    v128_t s1 = wasm_v128_load(src_argb + 16);
+    v128_t s2 = wasm_v128_load(src_argb + 32);
+    v128_t s3 = wasm_v128_load(src_argb + 48);
+    s0 = wasm_u32x4_shr(s0, 24);
+    s1 = wasm_u32x4_shr(s1, 24);
+    s2 = wasm_u32x4_shr(s2, 24);
+    s3 = wasm_u32x4_shr(s3, 24);
+    v128_t a = wasm_u8x16_narrow_i16x8(wasm_i16x8_narrow_i32x4(s0, s1),
+                                       wasm_i16x8_narrow_i32x4(s2, s3));
+    wasm_v128_store(dst_a, a);
+    src_argb += 64;
+    dst_a += 16;
+    width -= 16;
+  } while (width > 0);
+}
+#endif  // HAS_ARGBEXTRACTALPHAROW_WASMSIMD
+
+#ifdef HAS_ARGBCOPYYTOALPHAROW_WASMSIMD
+// Swizzle Y[i] to the alpha byte of 32 bit lane i; 128 indices give 0.
+static const uint8_t kYToAlphaSwizzleTable[64] = {
+    128, 128, 128, 0,  128, 128, 128, 1,  128, 128, 128, 2,  128, 128, 128, 3,
+    128, 128, 128, 4,  128, 128, 128, 5,  128, 128, 128, 6,  128, 128, 128, 7,
+    128, 128, 128, 8,  128, 128, 128, 9,  128, 128, 128, 10, 128, 128, 128, 11,
+    128, 128, 128, 12, 128, 128, 128, 13, 128, 128, 128, 14, 128, 128, 128, 15};
+
+void ARGBCopyYToAlphaRow_WASMSIMD(const uint8_t* src, uint8_t* dst, int width) {
+  v128_t rgb_mask = SplatConst32(0x00ffffff);
+  v128_t idx0 = LoadConst(kYToAlphaSwizzleTable);
+  v128_t idx1 = LoadConst(kYToAlphaSwizzleTable + 16);
+  v128_t idx2 = LoadConst(kYToAlphaSwizzleTable + 32);
+  v128_t idx3 = LoadConst(kYToAlphaSwizzleTable + 48);
+  do {
+    asm("" : "+r"(src), "+r"(dst));
+    v128_t y = wasm_v128_load(src);
+    v128_t d0 = wasm_v128_and(wasm_v128_load(dst), rgb_mask);
+    v128_t d1 = wasm_v128_and(wasm_v128_load(dst + 16), rgb_mask);
+    v128_t d2 = wasm_v128_and(wasm_v128_load(dst + 32), rgb_mask);
+    v128_t d3 = wasm_v128_and(wasm_v128_load(dst + 48), rgb_mask);
+    wasm_v128_store(dst, wasm_v128_or(d0, LIBYUV_WASM_SWIZZLE(y, idx0)));
+    wasm_v128_store(dst + 16, wasm_v128_or(d1, LIBYUV_WASM_SWIZZLE(y, idx1)));
+    wasm_v128_store(dst + 32, wasm_v128_or(d2, LIBYUV_WASM_SWIZZLE(y, idx2)));
+    wasm_v128_store(dst + 48, wasm_v128_or(d3, LIBYUV_WASM_SWIZZLE(y, idx3)));
+    src += 16;
+    dst += 64;
+    width -= 16;
+  } while (width > 0);
+}
+#endif  // HAS_ARGBCOPYYTOALPHAROW_WASMSIMD
+
 #undef LIBYUV_WASM_SWIZZLE
 
 #ifdef __cplusplus

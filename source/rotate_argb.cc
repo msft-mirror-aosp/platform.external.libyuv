@@ -160,6 +160,11 @@ static int ARGBRotate180(const uint8_t* src_argb,
     }
   }
 #endif
+#if defined(HAS_ARGBMIRRORROW_AVX512BW)
+  if (TestCpuFlag(kCpuHasAVX512BW)) {
+    ARGBMirrorRow = ARGBMirrorRow_AVX512BW;
+  }
+#endif
 #if defined(HAS_ARGBMIRRORROW_LSX)
   if (TestCpuFlag(kCpuHasLSX)) {
     ARGBMirrorRow = ARGBMirrorRow_Any_LSX;

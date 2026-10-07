@@ -2970,6 +2970,11 @@ int ARGBMirror(const uint8_t* src_argb,
     }
   }
 #endif
+#if defined(HAS_ARGBMIRRORROW_AVX512BW)
+  if (TestCpuFlag(kCpuHasAVX512BW)) {
+    ARGBMirrorRow = ARGBMirrorRow_AVX512BW;
+  }
+#endif
 #if defined(HAS_ARGBMIRRORROW_LSX)
   if (TestCpuFlag(kCpuHasLSX)) {
     ARGBMirrorRow = ARGBMirrorRow_Any_LSX;
@@ -3039,6 +3044,11 @@ int RGB24Mirror(const uint8_t* src_rgb24,
     if (IS_ALIGNED(width, 32)) {
       RGB24MirrorRow = RGB24MirrorRow_AVX2;
     }
+  }
+#endif
+#if defined(HAS_RGB24MIRRORROW_AVX512VBMI)
+  if (TestCpuFlag(kCpuHasAVX512VBMI)) {
+    RGB24MirrorRow = RGB24MirrorRow_AVX512VBMI;
   }
 #endif
 #if defined(HAS_RGB24MIRRORROW_WASMSIMD)
@@ -5754,6 +5764,11 @@ int ARGBExtractAlpha(const uint8_t* src_argb,
                                                 : ARGBExtractAlphaRow_Any_AVX2;
   }
 #endif
+#if defined(HAS_ARGBEXTRACTALPHAROW_AVX512BW)
+  if (TestCpuFlag(kCpuHasAVX512BW)) {
+    ARGBExtractAlphaRow = ARGBExtractAlphaRow_AVX512BW;
+  }
+#endif
 #if defined(HAS_ARGBEXTRACTALPHAROW_NEON)
   if (TestCpuFlag(kCpuHasNEON)) {
     ARGBExtractAlphaRow = IS_ALIGNED(width, 16) ? ARGBExtractAlphaRow_NEON
@@ -5764,6 +5779,13 @@ int ARGBExtractAlpha(const uint8_t* src_argb,
   if (TestCpuFlag(kCpuHasLSX)) {
     ARGBExtractAlphaRow = IS_ALIGNED(width, 16) ? ARGBExtractAlphaRow_LSX
                                                 : ARGBExtractAlphaRow_Any_LSX;
+  }
+#endif
+#if defined(HAS_ARGBEXTRACTALPHAROW_WASMSIMD)
+  if (TestCpuFlag(kCpuHasWASMSIMD)) {
+    ARGBExtractAlphaRow = IS_ALIGNED(width, 16)
+                              ? ARGBExtractAlphaRow_WASMSIMD
+                              : ARGBExtractAlphaRow_Any_WASMSIMD;
   }
 #endif
 #if defined(HAS_ARGBEXTRACTALPHAROW_RVV)
@@ -5821,6 +5843,24 @@ int ARGBCopyYToAlpha(const uint8_t* src_y,
     if (IS_ALIGNED(width, 16)) {
       ARGBCopyYToAlphaRow = ARGBCopyYToAlphaRow_AVX2;
     }
+  }
+#endif
+#if defined(HAS_ARGBCOPYYTOALPHAROW_AVX512BW)
+  if (TestCpuFlag(kCpuHasAVX512BW)) {
+    ARGBCopyYToAlphaRow = ARGBCopyYToAlphaRow_AVX512BW;
+  }
+#endif
+#if defined(HAS_ARGBCOPYYTOALPHAROW_NEON)
+  if (TestCpuFlag(kCpuHasNEON)) {
+    ARGBCopyYToAlphaRow = IS_ALIGNED(width, 16) ? ARGBCopyYToAlphaRow_NEON
+                                                : ARGBCopyYToAlphaRow_Any_NEON;
+  }
+#endif
+#if defined(HAS_ARGBCOPYYTOALPHAROW_WASMSIMD)
+  if (TestCpuFlag(kCpuHasWASMSIMD)) {
+    ARGBCopyYToAlphaRow = IS_ALIGNED(width, 16)
+                              ? ARGBCopyYToAlphaRow_WASMSIMD
+                              : ARGBCopyYToAlphaRow_Any_WASMSIMD;
   }
 #endif
 #if defined(HAS_ARGBCOPYYTOALPHAROW_RVV)

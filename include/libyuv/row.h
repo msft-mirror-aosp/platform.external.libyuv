@@ -385,6 +385,10 @@ extern "C" {
 #define HAS_RGBTOYMATRIXROW_AVX512BW
 #define HAS_BLENDPLANEROW_AVX512BW
 #define HAS_INTERPOLATEROW_AVX512BW
+#define HAS_ARGBEXTRACTALPHAROW_AVX512BW
+#define HAS_ARGBCOPYYTOALPHAROW_AVX512BW
+#define HAS_ARGBMIRRORROW_AVX512BW
+#define HAS_RGB24MIRRORROW_AVX512VBMI
 #endif
 #define HAS_ARGBTOYMATRIXROW_AVX2
 #define HAS_RGBTOYMATRIXROW_AVX2
@@ -452,6 +456,10 @@ extern "C" {
 #define HAS_SPLITUVROW_AVX512BW
 #define HAS_RGBTOUVMATRIXROW_AVX512BW
 #define HAS_RGBTOYMATRIXROW_AVX512BW
+#define HAS_ARGBEXTRACTALPHAROW_AVX512BW
+#define HAS_ARGBCOPYYTOALPHAROW_AVX512BW
+#define HAS_ARGBMIRRORROW_AVX512BW
+#define HAS_RGB24MIRRORROW_AVX512VBMI
 #endif
 
 // The following are available on Neon platforms:
@@ -465,6 +473,7 @@ extern "C" {
 #define HAS_ARGB4444TOARGBROW_NEON
 #define HAS_ARGB4444TOUVROW_NEON
 #define HAS_ARGB4444TOYROW_NEON
+#define HAS_ARGBCOPYYTOALPHAROW_NEON
 #define HAS_ARGBEXTRACTALPHAROW_NEON
 #define HAS_ARGBSETROW_NEON
 #define HAS_ARGBTOAB64ROW_NEON
@@ -937,6 +946,8 @@ extern "C" {
 #define HAS_ARGB4444TOUVMATRIXROW_WASMSIMD
 #define HAS_ARGB4444TOYMATRIXROW_WASMSIMD
 #define HAS_ARGBBLENDROW_WASMSIMD
+#define HAS_ARGBCOPYYTOALPHAROW_WASMSIMD
+#define HAS_ARGBEXTRACTALPHAROW_WASMSIMD
 #define HAS_ARGBMIRRORROW_WASMSIMD
 #define HAS_ARGBSHUFFLEROW_WASMSIMD
 #define HAS_ARGBTOARGB1555ROW_WASMSIMD
@@ -2770,6 +2781,7 @@ void MirrorSplitUVRow_C(const uint8_t* src_uv,
 void MirrorRow_16_C(const uint16_t* src, uint16_t* dst, int width);
 
 void ARGBMirrorRow_AVX2(const uint8_t* src, uint8_t* dst, int width);
+void ARGBMirrorRow_AVX512BW(const uint8_t* src, uint8_t* dst, int width);
 void ARGBMirrorRow_SSE2(const uint8_t* src, uint8_t* dst, int width);
 void ARGBMirrorRow_NEON(const uint8_t* src_argb, uint8_t* dst_argb, int width);
 void ARGBMirrorRow_LSX(const uint8_t* src, uint8_t* dst, int width);
@@ -2792,6 +2804,9 @@ void ARGBMirrorRow_Any_LASX(const uint8_t* src_ptr,
 void RGB24MirrorRow_AVX2(const uint8_t* src_rgb24,
                          uint8_t* dst_rgb24,
                          int width);
+void RGB24MirrorRow_AVX512VBMI(const uint8_t* src_rgb24,
+                               uint8_t* dst_rgb24,
+                               int width);
 void RGB24MirrorRow_NEON(const uint8_t* src_rgb24,
                          uint8_t* dst_rgb24,
                          int width);
@@ -3922,12 +3937,18 @@ void ARGBExtractAlphaRow_SSE2(const uint8_t* src_argb,
 void ARGBExtractAlphaRow_AVX2(const uint8_t* src_argb,
                               uint8_t* dst_a,
                               int width);
+void ARGBExtractAlphaRow_AVX512BW(const uint8_t* src_argb,
+                                  uint8_t* dst_a,
+                                  int width);
 void ARGBExtractAlphaRow_NEON(const uint8_t* src_argb,
                               uint8_t* dst_a,
                               int width);
 void ARGBExtractAlphaRow_LSX(const uint8_t* src_argb,
                              uint8_t* dst_a,
                              int width);
+void ARGBExtractAlphaRow_WASMSIMD(const uint8_t* src_argb,
+                                  uint8_t* dst_a,
+                                  int width);
 void ARGBExtractAlphaRow_RVV(const uint8_t* src_argb,
                              uint8_t* dst_a,
                              int width);
@@ -3943,10 +3964,16 @@ void ARGBExtractAlphaRow_Any_NEON(const uint8_t* src_ptr,
 void ARGBExtractAlphaRow_Any_LSX(const uint8_t* src_ptr,
                                  uint8_t* dst_ptr,
                                  int width);
+void ARGBExtractAlphaRow_Any_WASMSIMD(const uint8_t* src_ptr,
+                                      uint8_t* dst_ptr,
+                                      int width);
 
 void ARGBCopyYToAlphaRow_C(const uint8_t* src, uint8_t* dst, int width);
 void ARGBCopyYToAlphaRow_SSE2(const uint8_t* src, uint8_t* dst, int width);
 void ARGBCopyYToAlphaRow_AVX2(const uint8_t* src, uint8_t* dst, int width);
+void ARGBCopyYToAlphaRow_AVX512BW(const uint8_t* src, uint8_t* dst, int width);
+void ARGBCopyYToAlphaRow_NEON(const uint8_t* src, uint8_t* dst, int width);
+void ARGBCopyYToAlphaRow_WASMSIMD(const uint8_t* src, uint8_t* dst, int width);
 void ARGBCopyYToAlphaRow_RVV(const uint8_t* src, uint8_t* dst, int width);
 void ARGBCopyYToAlphaRow_Any_SSE2(const uint8_t* src_ptr,
                                   uint8_t* dst_ptr,
@@ -3954,6 +3981,12 @@ void ARGBCopyYToAlphaRow_Any_SSE2(const uint8_t* src_ptr,
 void ARGBCopyYToAlphaRow_Any_AVX2(const uint8_t* src_ptr,
                                   uint8_t* dst_ptr,
                                   int width);
+void ARGBCopyYToAlphaRow_Any_NEON(const uint8_t* src_ptr,
+                                  uint8_t* dst_ptr,
+                                  int width);
+void ARGBCopyYToAlphaRow_Any_WASMSIMD(const uint8_t* src_ptr,
+                                      uint8_t* dst_ptr,
+                                      int width);
 
 void SetRow_C(uint8_t* dst, uint8_t v8, int width);
 void SetRow_X86(uint8_t* dst, uint8_t v8, int width);
